@@ -15,9 +15,10 @@ def cli():
 
 @click.command('capture')
 @click.option('-n', '--count', default=3, help="Number of pictures")
-def capture_cmd(count: int):
+@click.option('-p', '--path', default=".data", help="Path to the data directory")
+def capture_cmd(count: int, path: str):
     """Capture a set of images for the calibration process"""
-    capture.do(count)
+    capture.do(count, path)
 
 
 @click.command('print')
