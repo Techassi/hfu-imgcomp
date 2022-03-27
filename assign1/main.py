@@ -21,12 +21,6 @@ def capture_cmd(count: int, path: str):
     capture.do(count, path)
 
 
-@click.command('print')
-def print_cmd():
-    """Print out calibration pattern"""
-    print.do()
-
-
 @click.command('params')
 def params_cmd():
     """Compute the camera parameters"""
@@ -42,7 +36,6 @@ def prettify_cmd():
 cli.add_command(prettify_cmd)
 cli.add_command(capture_cmd)
 cli.add_command(params_cmd)
-cli.add_command(print_cmd)
 
 if __name__ == '__main__':
     cli()
