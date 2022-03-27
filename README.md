@@ -1,7 +1,7 @@
-# HFU CompVis
+# HFU ImgComp
 
-This repository contains source code for all assignments from the lecture `Image processing and computer graphics`. The
-source code for each assignment is split upp into separate folders with the naming scheme `assign<NUMBER>`.
+This repository contains source code for all assignments from the lecture **Image processing and computer graphics**.
+The source code for each assignment is split upp into separate folders with the naming scheme `assign<NUMBER>`.
 
 ## Usage
 
