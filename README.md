@@ -9,7 +9,7 @@ The source code for each assignment is split upp into separate folders with the 
 
 ## Setup
 
-To setup the work enviroment to start developing code run the following commands:
+To setup the work environment to start developing code run the following commands:
 
 ```shell
 python -m venv .venv
