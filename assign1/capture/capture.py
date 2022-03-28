@@ -27,7 +27,8 @@ def do(count: int, path: str):
 
         # Preview the frame in the named window
         cv.imshow("preview", frame)
-        code = cv.waitKey()
+        # Needs to wait some seconds in order not to freeze in preview
+        code = cv.waitKey(10)
 
         # Exit if we press q
         if code == ord("q"):
