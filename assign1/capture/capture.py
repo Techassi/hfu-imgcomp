@@ -23,7 +23,7 @@ def do(count: int, path: str):
         # Read current frame from the video capture
         ok, frame = cap.read()
         if not ok:
-            click.echo('Failed to read the frame')
+            click.echo("Failed to read the frame")
             break
 
         # Preview the frame in the named window
