@@ -28,9 +28,10 @@ def params_cmd():
 
 
 @click.command('prettify')
-def prettify_cmd():
+@click.option('-p', '--path', default=".data", help="Path to the data directory")
+def prettify_cmd(path: str):
     """Undistort live image from a camera"""
-    prettify.do()
+    prettify.do(path)
 
 
 cli.add_command(prettify_cmd)
