@@ -8,9 +8,9 @@ def do(count: int, path: str):
     click.echo(f"Ready to capture {count} images")
     click.echo("Press <C> to capture image")
 
-    # Check if the .data dir exists. If not, create it
+    # Check if the data dir exists. If not, create it
     if not os.path.exists(path):
-        os.mkdir(path)
+        os.makedirs(path)
 
     # Create a video capture
     cap = cv.VideoCapture(0)

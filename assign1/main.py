@@ -14,24 +14,25 @@ def cli():
 
 
 @click.command('capture')
-@click.option('-n', '--count', default=3, help="Number of pictures")
-@click.option('-p', '--path', default=".data", help="Path to the data directory")
+@click.option('-n', '--count', default=3, help='Number of pictures')
+@click.option('-p', '--path', default='.data', help='Path to the data directory')
 def capture_cmd(count: int, path: str):
-    """Capture a set of images for the calibration process"""
+    '''Capture a set of images for the calibration process'''
     capture.do(count, path)
 
 
 @click.command('params')
 def params_cmd():
-    """Compute the camera parameters"""
+    '''Compute the camera parameters'''
     params.do()
 
 
 @click.command('prettify')
-@click.option('-p', '--path', default=".data", help="Path to the data directory")
-def prettify_cmd(path: str):
-    """Undistort live image from a camera"""
-    prettify.do(path)
+@click.option('-p', '--path', default=".data", help='Path to the data directory')
+@click.option('-r', '--results', default='.results', help='Path to the result directory')
+def prettify_cmd(path: str, results: str):
+    '''Undistort live image from a camera'''
+    prettify.do(path, results)
 
 
 cli.add_command(prettify_cmd)
