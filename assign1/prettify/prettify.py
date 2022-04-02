@@ -9,11 +9,13 @@ def do(path: str):
     '''Undistort live image from a camera'''
     click.echo(f'Reading in calibartion images from {path}')
 
-    pattern = os.path.join(path, '*.png')
+    pattern = os.path.join(path, '*.jpg')
     img_paths = glob.glob(pattern)
+    img_counter = len(img_paths)
     click.echo(f'Found {len(img_paths)} image(s)')
 
     for img_path in img_paths:
+        img_counter -= 1
         ok, corners, img = find_corners(img_path)
         if not ok:
             click.echo(f'Failed to find corners in {img_path}')
@@ -24,6 +26,7 @@ def do(path: str):
 
         while True:
             if cv.waitKey(10) == ord('n'):
+                print(f"{img_counter} image(s) remaining to view")
                 break
 
     cv.destroyAllWindows()
