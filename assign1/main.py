@@ -5,7 +5,6 @@ import click
 import prettify.prettify as prettify
 import capture.capture as capture
 import params.params as params
-import print.print as print
 
 
 @click.group()
