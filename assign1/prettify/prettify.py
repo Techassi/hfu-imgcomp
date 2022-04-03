@@ -21,12 +21,23 @@ def do(base_path: str, results_path: str):
     click.echo(f'Found {len(img_paths)} image(s)')
     click.echo('Press <n> for next image')
 
+    object_point_list = []
+    image_point_list = []
+
+    # First we calibrate with all source images
+    calibrate(img_paths, object_point_list, image_point_list)
+
+    # Prettify the images and save them in the result folder
+    prettify(img_paths, object_point_list, image_point_list, results_path)
+
+    cv.destroyAllWindows()
+
+
+def calibrate(img_paths: list, object_point_list: list, image_point_list: list):
+    '''Calibrate using the source images'''
     # Numpy magic
     object_points = np.zeros((9*6, 3), np.float32)
     object_points[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2)
-
-    object_point_list = []
-    image_point_list = []
 
     # Iterate over all found images
     for i in range(len(img_paths)):
@@ -55,10 +66,14 @@ def do(base_path: str, results_path: str):
 
         print(f"{len(img_paths) - i - 1} image(s) remaining to view")
 
-        # Prettify the image and save it in the result folder
-        prettify_image(img, gray_scaled_img, object_point_list, image_point_list, results_path, i)
 
-    cv.destroyAllWindows()
+def prettify(img_paths: list, object_point_list: list, image_point_list: list, results_path: str):
+    '''Prettify the images using the calibration data'''
+    for i in range(len(img_paths)):
+        img_path = img_paths[i]
+
+        img, gray_scaled_img = read_image(img_path)
+        prettify_image(img, gray_scaled_img, object_point_list, image_point_list, results_path, i)
 
 
 def read_image(img_path: str) -> Tuple[any, any]:
