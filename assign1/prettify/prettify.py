@@ -6,7 +6,7 @@ import glob
 import os
 
 
-def do(base_path: str, results_path: str):
+def do(base_path: str, results_path: str, preview: bool):
     '''Undistort live image from a camera'''
     click.echo(f'Reading in calibration images from {base_path}')
 
@@ -19,21 +19,30 @@ def do(base_path: str, results_path: str):
     img_paths = glob.glob(pattern)
 
     click.echo(f'Found {len(img_paths)} image(s)')
-    click.echo('Press <n> for next image')
+    if preview:
+        click.echo('Press <n> for next image, <q> to quit')
 
     object_point_list = []
     image_point_list = []
 
     # First we calibrate with all source images
-    calibrate(img_paths, object_point_list, image_point_list)
+    click.echo('Calibrating...')
+    exit = calibrate(img_paths, object_point_list, image_point_list, preview)
+    cv.destroyAllWindows()
+    if exit:
+        return
 
     # Prettify the images and save them in the result folder
-    prettify(img_paths, object_point_list, image_point_list, results_path)
-
+    click.echo('Prettifying...')
+    exit = prettify(img_paths, object_point_list, image_point_list, results_path, preview)
     cv.destroyAllWindows()
+    if exit:
+        return
+
+    click.echo('Done')
 
 
-def calibrate(img_paths: list, object_point_list: list, image_point_list: list):
+def calibrate(img_paths: list, object_point_list: list, image_point_list: list, preview: bool) -> bool:
     '''Calibrate using the source images'''
     # Numpy magic
     object_points = np.zeros((9*6, 3), np.float32)
@@ -55,6 +64,10 @@ def calibrate(img_paths: list, object_point_list: list, image_point_list: list):
         object_point_list.append(object_points)
         image_point_list.append(corners)
 
+        # Skip preview if --preview is false
+        if not preview:
+            continue
+
         # Draw and display detected corners for all images
         cv.drawChessboardCorners(img, (9, 6), optimized_corners, ok)
         cv.imshow('img', img)
@@ -62,18 +75,33 @@ def calibrate(img_paths: list, object_point_list: list, image_point_list: list):
         # Display preview until we press <n>
         exit = wait(10)
         if exit:
-            break
+            return True
 
         print(f"{len(img_paths) - i - 1} image(s) remaining to view")
 
 
-def prettify(img_paths: list, object_point_list: list, image_point_list: list, results_path: str):
+def prettify(img_paths: list, object_point_list: list, image_point_list: list, results_path: str, preview: bool) -> bool:
     '''Prettify the images using the calibration data'''
     for i in range(len(img_paths)):
         img_path = img_paths[i]
 
         img, gray_scaled_img = read_image(img_path)
-        prettify_image(img, gray_scaled_img, object_point_list, image_point_list, results_path, i)
+        undistorted_img = prettify_image(img, gray_scaled_img, object_point_list, image_point_list, results_path, i)
+
+        # If the undistortion process failed, continue
+        if undistorted_img is None:
+            continue
+
+        if not preview:
+            continue
+
+        # Display preview until we press <n>
+        cv.imshow('undistorted', undistorted_img)
+        exit = wait(10)
+        if exit:
+            return True
+
+        print(f"{len(img_paths) - i - 1} image(s) remaining to view")
 
 
 def read_image(img_path: str) -> Tuple[any, any]:
@@ -97,13 +125,13 @@ def find_corners(gray_scaled_img: any) -> Tuple[bool, list, list]:
     return True, corners, optimized_corners
 
 
-def prettify_image(img: any, gray: any, opl: list, ipl: list, results_path: str, i: int):
+def prettify_image(img: any, gray: any, opl: list, ipl: list, results_path: str, i: int) -> any:
     '''Prettify image and save it'''
     # Calibrate the camera
     ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(opl, ipl, gray.shape[::-1], None, None)
     if not ok:
         click.echo(f'Failed to calibrate camera with img{i}.jpg')
-        return
+        return None
 
     # Undistort
     undistorted_img = cv.undistort(img, mtx, dist, None)
@@ -111,6 +139,8 @@ def prettify_image(img: any, gray: any, opl: list, ipl: list, results_path: str,
     # Save image
     p = os.path.join(results_path, f"img{i}.jpg")
     cv.imwrite(p, undistorted_img)
+
+    return undistorted_img
 
 
 def wait(d: int) -> bool:
