@@ -29,12 +29,14 @@ def params_cmd(camera: int):
 
 
 @click.command('prettify')
+@click.option('-c', '--camera', default=0, help='Index of camera device')
 @click.option('-s', '--source', default=".data", help='Path to the source directory')
 @click.option('-r', '--results', default='.results', help='Path to the result directory')
+@click.option('-l', '--live', default=False, help='Live mode undistorts a live camera stream', is_flag=True)
 @click.option('-p', '--preview', default=False, help='Display preview windows for the calibration and result images', is_flag=True)
-def prettify_cmd(source: str, results: str, preview: bool):
+def prettify_cmd(camera: int, source: str, results: str, live: bool, preview: bool):
     '''Undistort live image from a camera'''
-    prettify.do(source, results, preview)
+    prettify.do(camera, source, results, live, preview)
 
 
 cli.add_command(prettify_cmd)

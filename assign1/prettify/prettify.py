@@ -1,3 +1,4 @@
+from curses import echo
 from typing import Tuple
 import numpy as np
 import cv2 as cv
@@ -6,7 +7,7 @@ import glob
 import os
 
 
-def do(base_path: str, results_path: str, preview: bool):
+def do(camera_index: int, base_path: str, results_path: str, live: bool, preview: bool):
     '''Undistort live image from a camera'''
     click.echo(f'Reading in calibration images from {base_path}')
 
@@ -28,18 +29,17 @@ def do(base_path: str, results_path: str, preview: bool):
     # First we calibrate with all source images
     click.echo('Calibrating...')
     exit = calibrate(img_paths, object_point_list, image_point_list, preview)
-    cv.destroyAllWindows()
     if exit:
         return
 
-    # Prettify the images and save them in the result folder
-    click.echo('Prettifying...')
-    exit = prettify(img_paths, object_point_list, image_point_list, results_path, preview)
-    cv.destroyAllWindows()
-    if exit:
-        return
-
-    click.echo('Done')
+    # Check if the user wants to use live mode
+    if live:
+        click.echo('Live mode. Prettifying...')
+        prettify_live(camera_index, object_point_list, image_point_list)
+    else:
+        # Prettify the images and save them in the result folder
+        click.echo('Standalone mode. Prettifying...')
+        prettify(img_paths, object_point_list, image_point_list, results_path, preview)
 
 
 def calibrate(img_paths: list, object_point_list: list, image_point_list: list, preview: bool) -> bool:
@@ -75,12 +75,13 @@ def calibrate(img_paths: list, object_point_list: list, image_point_list: list, 
         # Display preview until we press <n>
         exit = wait(10)
         if exit:
+            cv.destroyAllWindows()
             return True
 
         print(f"{len(img_paths) - i - 1} image(s) remaining to view")
 
 
-def prettify(img_paths: list, object_point_list: list, image_point_list: list, results_path: str, preview: bool) -> bool:
+def prettify(img_paths: list, object_point_list: list, image_point_list: list, results_path: str, preview: bool):
     '''Prettify the images using the calibration data'''
     for i in range(len(img_paths)):
         img_path = img_paths[i]
@@ -100,9 +101,37 @@ def prettify(img_paths: list, object_point_list: list, image_point_list: list, r
         cv.imshow('undistorted', undistorted_img)
         exit = wait(10)
         if exit:
-            return True
+            cv.destroyAllWindows()
 
         print(f"{len(img_paths) - i - 1} image(s) remaining to view")
+
+
+def prettify_live(camera_index: int, op_list: list, ip_list: list):
+    cap = cv.VideoCapture(camera_index)
+
+    # Capture one frame to calculate the gray scaled frame for the shape
+    ok, frame = cap.read()
+    if not ok:
+        return
+
+    gray_scaled_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+
+    # Calibrate the camera
+    ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(op_list, ip_list, gray_scaled_frame.shape[::-1], None, None)
+    if not ok:
+        click.echo(f'Failed to calibrate camera with first frame')
+        return
+
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+
+        undistorted_frame = cv.undistort(frame, mtx, dist, None)
+        cv.imshow('live', undistorted_frame)
+
+        if cv.waitKey(10) == ord('q'):
+            break
 
 
 def read_image(img_path: str) -> Tuple[any, any]:
@@ -126,10 +155,10 @@ def find_corners(gray_scaled_img: any) -> Tuple[bool, list, list]:
     return True, corners, optimized_corners
 
 
-def prettify_image(img: any, gray: any, opl: list, ipl: list, results_path: str, i: int) -> any:
+def prettify_image(img: any, gray: any, op_list: list, ip_list: list, results_path: str, i: int) -> any:
     '''Prettify image and save it'''
     # Calibrate the camera
-    ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(opl, ipl, gray.shape[::-1], None, None)
+    ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(op_list, ip_list, gray.shape[::-1], None, None)
     if not ok:
         click.echo(f'Failed to calibrate camera with img{i}.jpg')
         return None
