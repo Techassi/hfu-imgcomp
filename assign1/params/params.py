@@ -2,10 +2,10 @@ import click
 import cv2 as cv
 
 
-def do():
+def do(camera_index: int):
     """Compute the camera parameters"""
     # Create a video capture
-    cap = cv.VideoCapture(0)
+    cap = cv.VideoCapture(camera_index)
 
     # List of parameters
     params = [

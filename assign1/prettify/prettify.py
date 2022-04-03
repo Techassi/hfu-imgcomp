@@ -92,6 +92,7 @@ def prettify(img_paths: list, object_point_list: list, image_point_list: list, r
         if undistorted_img is None:
             continue
 
+        # Skip preview if --preview is false
         if not preview:
             continue
 

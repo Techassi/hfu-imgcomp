@@ -15,16 +15,17 @@ def cli():
 
 @click.command('capture')
 @click.option('-n', '--count', default=3, help='Number of pictures')
-@click.option('-s', '--source', default='.data', help='Path to the source directory')
+@click.option('-p', '--path', default='.data', help='Path to the source directory')
 def capture_cmd(count: int, path: str):
     '''Capture a set of images for the calibration process'''
     capture.do(count, path)
 
 
 @click.command('params')
-def params_cmd():
+@click.option('-c', '--camera', default=0, help='Index of camera device')
+def params_cmd(camera: int):
     '''Compute the camera parameters'''
-    params.do()
+    params.do(camera)
 
 
 @click.command('prettify')
