@@ -9,7 +9,12 @@ import prettify.prettify as prettify
 
 
 def do(base_path: str, preview: bool):
-    '''Print the reprojection error'''
+    '''Print the reprojection error.
+
+    Args:
+        base_path (str): Base path of source images
+        preview (bool): Display preview window    
+    '''
     click.echo(f'Reading in calibration images from {base_path}')
 
     # Get all .jpg images from the data folder
@@ -28,9 +33,11 @@ def do(base_path: str, preview: bool):
         click.echo(f'Failed to calibrate camera with {img_paths[0]}')
         return
 
+    # Calculate the reprojection error
     mean_error = 0
     for i in range(len(op_list)):
-        imgpoints2, _ = cv.projectPoints(op_list[i], rvecs[i], tvecs[i], mtx, dist)
-        error = cv.norm(ip_list[i], imgpoints2, cv.NORM_L2)/len(imgpoints2)
+        img_points, _ = cv.projectPoints(op_list[i], rvecs[i], tvecs[i], mtx, dist)
+        error = cv.norm(ip_list[i], img_points, cv.NORM_L2)/len(img_points)
         mean_error += error
-    print("total error: {}".format(mean_error/len(op_list)))
+
+    click.echo(f"Total error: {mean_error/len(op_list)}")

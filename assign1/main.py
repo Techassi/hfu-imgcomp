@@ -41,7 +41,7 @@ def prettify_cmd(camera: int, source: str, results: str, live: bool, preview: bo
 
 @click.command('error')
 @click.option('-s', '--source', default=".data", help='Path to the source directory')
-@click.option('-p', '--preview', default=False, help='Display preview windows for the calibration and result images', is_flag=True)
+@click.option('-p', '--preview', default=False, help='Display preview windows for the calibration images', is_flag=True)
 def error_cmd(source: str, preview: bool):
     '''Print the reprojection error'''
     error.do(source, preview)
