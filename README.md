@@ -10,5 +10,5 @@ To setup the work environment and start developing code run the following comman
 ```shell
 python -m venv .venv
 source .venv/bin/activate
-pip install < requirements.txt
+pip install -r requirements.txt
 ```
