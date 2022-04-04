@@ -5,6 +5,7 @@ import click
 import glob
 import os
 
+# Local packages
 from calibration import calibration
 from utils import images, wait
 
@@ -63,10 +64,10 @@ def prettify_standalone(img_paths: list, op_list: list, ip_list: list, results_p
         preview (bool): Display preview window
     '''
     # Take the first image to calibrate the camera
-    gray_scaled_img = images.read_image_gray(img_paths[0])
+    img, gray_scaled_img = images.read_image_both(img_paths[0])
 
     # Calibrate the camera
-    ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(op_list, ip_list, gray_scaled_img.shape[::-1], None, None)
+    ok, mtx, dist, optimized_mtx, roi = calibration.calibrate_camera(img, gray_scaled_img, op_list, ip_list)
     if not ok:
         click.echo(f'Failed to calibrate camera with first frame')
         return
@@ -75,7 +76,7 @@ def prettify_standalone(img_paths: list, op_list: list, ip_list: list, results_p
         img_path = img_paths[i]
 
         img = cv.imread(img_path)
-        undistorted_img = images.prettify_and_save(img, mtx, dist, results_path, i)
+        undistorted_img = images.prettify_and_save(img, mtx, dist, optimized_mtx, roi, results_path, i)
 
         # If the undistortion process failed, continue
         if undistorted_img is None:
@@ -112,9 +113,7 @@ def prettify_live(camera_index: int, op_list: list, ip_list: list):
     gray_scaled_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
     # Calibrate the camera
-    # TODO (Techassi): Add matrix optimizations, see cv.getOptimalNewCameraMatrix()
-    # TODO (Techassi): Move the calibration and optimization code into a function
-    ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(op_list, ip_list, gray_scaled_frame.shape[::-1], None, None)
+    ok, mtx, dist, optimized_mtx, roi = calibration.calibrate_camera(frame, gray_scaled_frame, op_list, ip_list)
     if not ok:
         click.echo(f'Failed to calibrate camera with first frame')
         return
@@ -124,7 +123,9 @@ def prettify_live(camera_index: int, op_list: list, ip_list: list):
         if not ok:
             break
 
-        undistorted_frame = cv.undistort(frame, mtx, dist, None)
+        x, y, w, h = roi
+        undistorted_frame = cv.undistort(frame, mtx, dist, None, optimized_mtx)
+        undistorted_frame = undistorted_frame[y:y+h, x:x+w]
         cv.imshow('live', undistorted_frame)
 
         if cv.waitKey(10) == ord('q'):

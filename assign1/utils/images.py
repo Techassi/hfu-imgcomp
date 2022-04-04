@@ -33,7 +33,7 @@ def read_image_gray(img_path: str) -> any:
     return gray_scaled_img
 
 
-def prettify_and_save(img: any, mtx: any, dist: any, results_path: str, idx: int) -> any:
+def prettify_and_save(img: any, mtx: any, dist: any, optimized_mtx: any, roi: any, results_path: str, idx: int) -> any:
     '''Prettify image and save it inside <results_path>
 
     Args:
@@ -47,7 +47,9 @@ def prettify_and_save(img: any, mtx: any, dist: any, results_path: str, idx: int
         undistorted_img (any): Undistorted image
     '''
     # Undistort
-    undistorted_img = cv.undistort(img, mtx, dist, None)
+    x, y, w, h = roi
+    undistorted_img = cv.undistort(img, mtx, dist, None, optimized_mtx)
+    undistorted_img = undistorted_img[y:y+h, x:x+w]
 
     # Save image
     p = os.path.join(results_path, f"img{idx}.jpg")
