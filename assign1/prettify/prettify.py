@@ -6,6 +6,7 @@ import click
 import glob
 import os
 
+
 '''The code below is based on the OpenCV tutorial on camera calibration
 available on https://docs.opencv.org/4.5.5/dc/dbb/tutorial_py_calibration.html'''
 
