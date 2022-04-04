@@ -5,8 +5,8 @@ reference images.
 
 ## Getting started
 
-To install all required dependencies consult [this](../README.md#setup) section. The dependencies for this assignment
-are:
+To install all required dependencies consult [this](../README.md#setup) section. The core dependencies for this
+assignment are:
 
 - OpenCV: `opencv-python`. A wrapper package for OpenCV python bindings. OpenCV is a library of programming functions
   mainly aimed at real-time computer vision. ([PyPI](https://pypi.org/project/opencv-python/))
@@ -15,8 +15,8 @@ are:
 - Click: `click`. Click is a Python package for creating beautiful command line interfaces in a composable way with as
   little code as necessary. ([PyPI](https://pypi.org/project/click/))
 
-Exact version numbers can be found in [requirements.txt](../requirements.txt). After the installation of the
-dependencies, we `cd` into the `assign1` folder:
+All dependencies (which include indirect dependencies) and their exact version numbers can be found in
+[requirements.txt](../requirements.txt). After the installation of the dependencies, we `cd` into the `assign1` folder
 
 ```shell
 cd assign1
@@ -98,4 +98,15 @@ python main.py prettify -p
 # Use live mode
 python main.py prettify --live
 python main.py prettify -l
+```
+
+### Reprojection Error
+
+> BONUS: Write a script that computes the reprojection error for one image in mm, including a explanatory output and
+> documentation how to use it.
+
+To print the reprojection error based on the calibration images we can use
+
+```shell
+python main.py error
 ```

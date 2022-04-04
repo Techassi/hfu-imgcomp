@@ -5,6 +5,7 @@ import click
 import prettify.prettify as prettify
 import capture.capture as capture
 import params.params as params
+import error.error as error
 
 
 @click.group()
@@ -38,9 +39,18 @@ def prettify_cmd(camera: int, source: str, results: str, live: bool, preview: bo
     prettify.do(camera, source, results, live, preview)
 
 
+@click.command('error')
+@click.option('-s', '--source', default=".data", help='Path to the source directory')
+@click.option('-p', '--preview', default=False, help='Display preview windows for the calibration and result images', is_flag=True)
+def error_cmd(source: str, preview: bool):
+    '''Print the reprojection error'''
+    error.do(source, preview)
+
+
 cli.add_command(prettify_cmd)
 cli.add_command(capture_cmd)
 cli.add_command(params_cmd)
+cli.add_command(error_cmd)
 
 if __name__ == '__main__':
     cli()
