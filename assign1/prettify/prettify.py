@@ -6,6 +6,10 @@ import glob
 import os
 
 
+'''The code below is based on the OpenCV tutorial on camera calibration 
+available under https://docs.opencv.org/4.5.5/dc/dbb/tutorial_py_calibration.html'''
+
+
 def do(base_path: str, results_path: str):
     '''Undistort live image from a camera'''
     click.echo(f'Reading in calibration images from {base_path}')
