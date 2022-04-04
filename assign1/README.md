@@ -15,7 +15,7 @@ are:
 - Click: `click`. Click is a Python package for creating beautiful command line interfaces in a composable way with as
   little code as necessary. ([PyPI](https://pypi.org/project/click/))
 
-Exact version numbers can be found in [requirements.txt](../requirements.txt).After the installation of the
+Exact version numbers can be found in [requirements.txt](../requirements.txt). After the installation of the
 dependencies, we `cd` into the `assign1` folder:
 
 ```shell
@@ -27,13 +27,13 @@ cd assign1
 For a quick overview off all commands run
 
 ```shell
-python main.py -h
+python main.py --help
 ```
 
 To retrieve usage information on each subcommand run
 
 ```shell
-python main.py <COMMAND> -h
+python main.py <COMMAND> --help
 ```
 
 ### Capture images for calibration
@@ -94,4 +94,8 @@ python main.py prettify -r .results
 # Enable preview windows (for standalone mode)
 python main.py prettify --preview
 python main.py prettify -p
+
+# Use live mode
+python main.py prettify --live
+python main.py prettify -l
 ```
