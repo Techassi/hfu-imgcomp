@@ -3,13 +3,9 @@
 This repository contains source code for all assignments from the lecture **Image processing and computer graphics**.
 The source code for each assignment is split upp into separate folders with the naming scheme `assign<NUMBER>`.
 
-## Usage
-
-...
-
 ## Setup
 
-To setup the work environment to start developing code run the following commands:
+To setup the work environment and start developing code run the following commands:
 
 ```shell
 python -m venv .venv
