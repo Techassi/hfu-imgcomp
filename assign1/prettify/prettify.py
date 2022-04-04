@@ -67,7 +67,8 @@ def prettify_standalone(img_paths: list, op_list: list, ip_list: list, results_p
     img, gray_scaled_img = images.read_image_both(img_paths[0])
 
     # Calibrate the camera
-    ok, mtx, dist, optimized_mtx, roi = calibration.calibrate_camera(img, gray_scaled_img, op_list, ip_list)
+    ok, mtx, dist, rvecs, tvecs, optimized_mtx, roi = calibration.calibrate_camera(
+        img, gray_scaled_img, op_list, ip_list)
     if not ok:
         click.echo(f'Failed to calibrate camera with first frame')
         return

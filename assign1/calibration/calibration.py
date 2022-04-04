@@ -81,7 +81,7 @@ def find_corners(gray_scaled_img: any) -> Tuple[bool, list, list]:
     return True, corners, optimized_corners
 
 
-def calibrate_camera(img: any, gray_scaled_img: any, op_list: list, ip_list: list) -> Tuple[bool, any, any, any, any]:
+def calibrate_camera(img: any, gray_scaled_img: any, op_list: list, ip_list: list) -> Tuple[bool, any, any, any, any, any, any]:
     '''Calibrate the camera and optimize the camera matrix. The optimized matrix can bes used to undistort the image.
 
     Args:
@@ -94,6 +94,8 @@ def calibrate_camera(img: any, gray_scaled_img: any, op_list: list, ip_list: lis
         ok (bool): True if successful, otherwise False
         mtx (any): Camera matrix
         dist (any): Distortion coefficients
+        rvecs (any): Rotation vectors
+        tvecs (any): Translation vectors
         optimized_mtx (any): Optimized (new) camera matrix
         roi (any): Region of interest (x, y, w, h)
     '''
@@ -101,11 +103,9 @@ def calibrate_camera(img: any, gray_scaled_img: any, op_list: list, ip_list: lis
     ok, mtx, dist, rvecs, tvecs = cv.calibrateCamera(op_list, ip_list, gray_scaled_img.shape[::-1], None, None)
     if not ok:
         click.echo('Failed to calibrate camera')
-        return False, None, None, None, None
+        return False, None, None, None, None, None, None
 
     height, width = img.shape[:2]
     optimized_mtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (width, height), 1, (width, height))
 
-    print(roi)
-
-    return True, mtx, dist, optimized_mtx, roi
+    return True, mtx, dist, rvecs, tvecs, optimized_mtx, roi
