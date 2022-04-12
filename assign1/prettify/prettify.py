@@ -114,7 +114,7 @@ def prettify_live(camera_index: int, op_list: list, ip_list: list):
     gray_scaled_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
     # Calibrate the camera
-    ok, mtx, dist, optimized_mtx, roi = calibration.calibrate_camera(frame, gray_scaled_frame, op_list, ip_list)
+    ok, mtx, dist, _, _, optimized_mtx, roi = calibration.calibrate_camera(frame, gray_scaled_frame, op_list, ip_list)
     if not ok:
         click.echo(f'Failed to calibrate camera with first frame')
         return
