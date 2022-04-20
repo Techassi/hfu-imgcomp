@@ -65,7 +65,8 @@ def do(base_path: str):
 
     # Check if the data dir exists
     if not os.path.exists(base_path):
-        click.echo(f'Image source path <{base_path}> does not exist')
+        click.echo(f'Image source path <{base_path}> does not exist. Exiting')
+        return
 
     # Get all .jpg images from the data folder
     pattern = os.path.join(base_path, '*.jpg')
