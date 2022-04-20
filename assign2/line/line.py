@@ -32,7 +32,7 @@ def do(base_path: str):
     try:
         index = int(input_value)
     except:
-        click.echo("Invalid input. Exiting")
+        click.echo('Invalid input. Exiting')
 
     # Check if in range
     if index - 1 < 0 or index > len(img_paths):
