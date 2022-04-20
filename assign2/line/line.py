@@ -1,9 +1,10 @@
+from msilib.schema import Error
 import cv2 as cv
 import click
 import glob
 import os
 
-import utils.print as print
+import utils.print_img_path as p_print
 
 
 def do(base_path: str):
@@ -23,7 +24,7 @@ def do(base_path: str):
 
     # Display found images
     click.echo(f'Found <{len(img_paths)}> image(s)')
-    print.image_list(img_paths)
+    p_print.image_list(img_paths)
     input_value = input(f'Enter number between 1 and {len(img_paths)} to select image to use: ')
 
     # Convert to integer
@@ -35,8 +36,9 @@ def do(base_path: str):
 
     # Check if in range
     if index - 1 < 0 or index > len(img_paths):
-        return
+        raise(IndexError('Invalid index'))
 
-    img, ok = cv.imread(img_paths[index-1])
-    if not ok:
-        return
+    try:
+        img = cv.imread(img_paths[index-1], cv.IMREAD_COLOR)
+    except Exception as e:
+        print(e)
