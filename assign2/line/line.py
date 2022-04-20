@@ -1,10 +1,10 @@
-from msilib.schema import Error
 import cv2 as cv
 import click
 import glob
 import os
 
-import utils.print_img_path as p_print
+import utils.wait as wait
+import utils.fmt as fmt
 
 
 def do(base_path: str):
@@ -24,7 +24,7 @@ def do(base_path: str):
 
     # Display found images
     click.echo(f'Found <{len(img_paths)}> image(s)')
-    p_print.image_list(img_paths)
+    fmt.print_image_list(img_paths)
     input_value = input(f'Enter number between 1 and {len(img_paths)} to select image to use: ')
 
     # Convert to integer
@@ -33,12 +33,21 @@ def do(base_path: str):
         index = int(input_value)
     except:
         click.echo('Invalid input. Exiting')
+        return
 
     # Check if in range
     if index - 1 < 0 or index > len(img_paths):
-        raise(IndexError('Invalid index'))
+        click.echo('Invalid index. Out or range. Exiting')
+        return
 
-    try:
-        img = cv.imread(img_paths[index-1], cv.IMREAD_COLOR)
-    except Exception as e:
-        print(e)
+    # try:
+    #     img = cv.imread(img_paths[index-1], cv.IMREAD_COLOR)
+    # except Exception as e:
+    #     print(e)
+
+    img = cv.imread(img_paths[index-1])
+    cv.imshow('win', img)
+
+    exit = wait.wait(10)
+    if exit:
+        return
