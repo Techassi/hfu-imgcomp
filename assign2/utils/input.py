@@ -47,8 +47,8 @@ def range_input(message: str, min: int, max: int, verbose: bool = True) -> Tuple
 
 def enforce_range_input(message: str, min: int, max: int) -> int:
     '''
-    Retrieve an integer input between 'min' and 'max' from the user. If the user
-    provides an invalid input, try again.
+    Retrieve an integer input between 'min' and 'max' from the user.
+    If the user provides an invalid input, try again.
 
     Parameters
     ----------

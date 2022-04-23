@@ -27,11 +27,11 @@ def calc_cmd():
 
 @click.command('edges')
 @click.option('-p', '--path', default='.data', help='Path to the source image directory', type=str)
-@click.option('-u', '--max', default=200, help='Max value for hysteresis thresholding', type=int)
 @click.option('-l', '--min', default=100, help='Min value for hysteresis thresholding', type=int)
-def edges_cmd(path: str, max: int, min: int):
+@click.option('-u', '--max', default=200, help='Max value for hysteresis thresholding', type=int)
+def edges_cmd(path: str, min: int, max: int):
     '''Automatic edge detection to calculate the vanishing line'''
-    edges.do(path, max, min)
+    edges.do(path, min, max)
 
 
 cli.add_command(edges_cmd)
