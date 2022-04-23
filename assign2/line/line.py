@@ -1,18 +1,17 @@
 import cv2 as cv
 import click
-import glob
-import os
 
+import utils.images as images
 import utils.lines as lines
+import utils.input as inp
 import utils.wait as wait
-import utils.fmt as fmt
 
 clicked_points = []
 
 
 def handle_click(img, event, x, y, flags, param):
     '''
-    Handle left mouse button click
+    Handle left mouse button click.
 
     Parameters
     ----------
@@ -54,7 +53,7 @@ def handle_click(img, event, x, y, flags, param):
 
 def do(base_path: str):
     '''
-    Compute the vanishing line based on a selected plane
+    Compute the vanishing line based on a selected plane.
 
     Parameters
     ----------
@@ -63,36 +62,17 @@ def do(base_path: str):
     '''
     window_name = 'win'
 
-    # Check if the data dir exists
-    if not os.path.exists(base_path):
-        click.echo(f'Image source path <{base_path}> does not exist. Exiting')
-        return
-
-    # Get all .jpg images from the data folder
-    pattern = os.path.join(base_path, '*.jpg')
-    img_paths = glob.glob(pattern)
-
-    if len(img_paths) == 0:
-        click.echo('No images found. Exiting')
+    # Glob images
+    img_paths, ok = images.list(base_path)
+    if not ok:
         return
 
     # Display found images
     click.echo(f'Found <{len(img_paths)}> image(s)')
-    fmt.print_image_list(img_paths)
-    input_value = input(f'Enter number between 1 and {len(img_paths)} to select image to use: ')
+    images.print_list(img_paths)
 
-    # Convert to integer
-    index = 0
-    try:
-        index = int(input_value)
-    except:
-        click.echo('Invalid input. Exiting')
-        return
-
-    # Check if in range
-    if index < 1 or index > len(img_paths):
-        click.echo('Invalid index. Out of range. Exiting')
-        return
+    index = inp.enforce_range_input(
+        f'Enter number between 1 and {len(img_paths)} to select image to use: ', 1, len(img_paths))
 
     img = cv.imread(img_paths[index-1])
     cv.imshow(window_name, img)
@@ -100,14 +80,12 @@ def do(base_path: str):
     def callback(event, x, y, flags, param): return handle_click(img, event, x, y, flags, param)
     cv.setMouseCallback(window_name, callback)
 
-    exit = wait.wait(10)
-    if exit:
-        return
+    wait.wait(10)
 
 
 def draw_circle(img, x: int, y: int, color: tuple = (0, 0, 0)):
     '''
-    Draw circle in 'img' at 'x' and 'y' with 'color'
+    Draw circle in 'img' at 'x' and 'y' with 'color'.
 
     Parameters
     ----------
@@ -126,7 +104,7 @@ def draw_circle(img, x: int, y: int, color: tuple = (0, 0, 0)):
 
 def draw_line(img, a: tuple, b: tuple, color: tuple = (244, 164, 96)):
     '''
-    Draw a line between two points
+    Draw a line between two points 'a' and 'b' with 'color'.
 
     Parameters
     ----------
