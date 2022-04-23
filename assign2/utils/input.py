@@ -64,7 +64,7 @@ def enforce_range_input(message: str, min: int, max: int) -> int:
     value : int
         The valid input value
     '''
-    v, ok = range_input(message, min, max)
+    v, ok = range_input(message, min, max, False)
     while not ok:
         click.echo('Invalid input. Try again')
         v, ok = range_input(message, min, max, False)
