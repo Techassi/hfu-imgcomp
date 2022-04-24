@@ -3,7 +3,7 @@ import click
 
 import utils.images as images
 import utils.input as inp
-import utils.wait as wait
+import utils.wait_reset as wait_reset
 
 
 def do(base_path: str, min: int, max: int):
@@ -35,7 +35,7 @@ def do(base_path: str, min: int, max: int):
 
     edges = detect_edges(img_paths[index-1], min, max, True)
     cv.imshow(window_name, edges)
-    wait.wait(10)
+    wait_reset.wait_reset(10)
 
 
 def detect_edges(img_path: str, min: int, max: int, grayscale: bool = False) -> any:
