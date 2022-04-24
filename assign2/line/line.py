@@ -72,7 +72,9 @@ def handle_click(img, event, x, y, flags, param):
         draw_t()
         cr = cross_ratio(calc_H(), calc_R())
         erg = calc_H() / cr
-        print(erg)
+        # Magic number hey
+        pixel_ratio = 0.0264583333
+        print(str(erg * pixel_ratio) + ' cm')
 
 
 def store_vanishing_points(vanishing_point: tuple):

@@ -20,7 +20,6 @@ def main_van_v(vx: tuple, vy: tuple, b: tuple, b0: tuple) -> tuple:
 def calc_t(v: tuple, t0: tuple, r: tuple, b: tuple) -> tuple:
     cross_line_v_t = lines.get_line_from(v, t0)
     cross_line_r_b = lines.get_line_from(r, b)
-    print(cross_line_r_b)
     t = lines.get_intersection_pos(cross_line_v_t, cross_line_r_b)
 
     return t
