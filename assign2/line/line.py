@@ -68,8 +68,8 @@ def handle_click(img, event, x, y, flags, param):
     if len(vanishing_points) == 2 and len(clicked_object_points) == 4:
         world_img, min_world_x, min_world_y, border = create_world_image(x, img)
         translate_world_img(img, world_img, min_world_x, min_world_y, border)
-        draw_vanishing_point_horizon()
-        draw_t()
+        get_v()
+        get_t()
         cr = cross_ratio(calc_H(), calc_R())
         erg = calc_H() / cr
         # Magic number hey
@@ -161,29 +161,25 @@ def draw_vans_in_world(world_img: Any,
     cv.imshow(title, world_img)
 
 
-def draw_vanishing_point_horizon() -> None:
+def get_v() -> tuple:
     global vanishing_points, clicked_object_points, world_img_copy
     v = calc.main_van_v(vanishing_points[0],
                         vanishing_points[1],
                         clicked_object_points[1],
                         clicked_object_points[3])
 
-    draw_circle(world_img_copy, v[0], v[1], (255, 255, 0))
+    return v
 
 
-def draw_t() -> None:
+def get_t() -> tuple:
     global vanishing_points, clicked_object_points, world_img_copy
-    v = calc.main_van_v(vanishing_points[0],
-                        vanishing_points[1],
-                        clicked_object_points[1],
-                        clicked_object_points[3])
 
-    t = calc.calc_t(v,
+    t = calc.calc_t(get_v(),
                     clicked_object_points[0],
                     clicked_object_points[2],
                     clicked_object_points[3])
 
-    draw_circle(world_img_copy, t[0], t[1], (255, 255, 0))
+    return t
 
 
 def calc_R() -> float:
@@ -194,17 +190,7 @@ def calc_R() -> float:
 
 
 def calc_H() -> float:
-    v = calc.main_van_v(vanishing_points[0],
-                        vanishing_points[1],
-                        clicked_object_points[1],
-                        clicked_object_points[3])
-
-    t = calc.calc_t(v,
-                    clicked_object_points[0],
-                    clicked_object_points[2],
-                    clicked_object_points[3])
-
-    H = calc.calc_distance_points(t, clicked_object_points[3])
+    H = calc.calc_distance_points(get_t(), clicked_object_points[3])
 
     return H
 
