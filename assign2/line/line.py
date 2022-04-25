@@ -21,19 +21,22 @@ class State(Enum):
     CALCULATION = 4
 
 
-state: State = State.FIRST_V_POINT
-second_v_point = []
-first_v_point = []
-bottle_points = []
-mug_points = []
-
 clicked_object_points = []
 world_img_copy = None
 vanishing_points = []
 clicked_points = []
 
+state: State = State.FIRST_V_POINT
+render_data = {
+    'f_list': [],  # First lines points
+    's_list': [],  # Second lines points
+    'b_list': [],  # Bottle points
+    'm_list': [],  # Mug points
+    'v_list': [],  # Vanishing points
+}
 
-def handle_click(img, event, x, y, flags, param):
+
+def handle_click(img: any, x: int, y: int, flags: any, param: any):
     '''
     Handle left mouse button click.
 
@@ -41,8 +44,6 @@ def handle_click(img, event, x, y, flags, param):
     ----------
     img : Mat
         Image
-    event : int
-        OpenCV event code
     x : Any
         X component of the clicked position
     y : Any
@@ -50,45 +51,48 @@ def handle_click(img, event, x, y, flags, param):
     flags : Any
     param : Any
     '''
-    global vanishing_points, clicked_points, clicked_object_points, first_v_point, state
+    global vanishing_points, clicked_points, clicked_object_points, state, render_data
 
-    # Ignore everything except left mouse button clicks
-    if event != cv.EVENT_LBUTTONDOWN:
-        return
-
+    # State machine
     match state:
         case State.FIRST_V_POINT:
-            first_v_point.append((x, y))
+            render_data['f_list'].append((x, y))
 
-            if len(first_v_point) == 2:
+            if len(render_data['f_list']) == 4:
+                # Calculate and append first vanishing point
+                vpoint = geometry.vpoint_from(render_data['f_list'])
+                render_data['v_list'].append(vpoint)
+
+                # Change state
                 state = State.SECOND_V_POINT
+                click.echo('Select second pair of lines')
         case State.SECOND_V_POINT:
-            second_v_point.append(x, y)
+            render_data['s_list'].append((x, y))
 
-            if len(second_v_point) == 2:
+            if len(render_data['s_list']) == 4:
+                # Calculate and append second vanishing point
+                vpoint = geometry.vpoint_from(render_data['s_list'])
+                render_data['v_list'].append(vpoint)
+
+                # Change state
                 state = State.BOTTLE_POINTS
+                click.echo('Select height of bottle')
         case State.BOTTLE_POINTS:
-            bottle_points.append((x, y))
+            render_data['b_list'].append((x, y))
 
-            if len(bottle_points) == 2:
+            if len(render_data['b_list']) == 2:
+                # TODO (Techassi): Calculate pixel to cm ratio based on the known size of the bottle
                 state = State.MUG_POINTS
+                click.echo('Select height of mug')
         case State.MUG_POINTS:
-            mug_points.append((x, y))
+            render_data['m_list'].append((x, y))
 
-            if len(mug_points) == 2:
-                state = State.CALCULATION
+            if len(render_data['m_list']) == 2:
+                # TODO (Techassi): Calculate mug height and draw final image
+                pass
 
-            # If we have enough points to calculate and draw vanishing line
-    if len(clicked_points) >= 8:
-        return
-
-    # Append point to list and draw point in image
-    clicked_points.append((x, y))
-    drawing.circle(img, (x, y))
-
-    # If we have an even number of points, draw line
-    if len(clicked_points) % 2 == 0 and len(clicked_points) != 0:
-        drawing.line(img, clicked_points[-1], clicked_points[-2])
+    drawing.render_image(img, render_data)
+    return
 
     if len(clicked_object_points) % 2 == 0 and len(clicked_object_points) != 0:
         drawing.line(img, clicked_object_points[-1], clicked_object_points[-2])
@@ -242,7 +246,14 @@ def do(base_path: str):
     cv.namedWindow(window_name, cv.WINDOW_GUI_NORMAL)
     cv.imshow(window_name, img)
 
-    def callback(event, x, y, flags, param): return handle_click(img, event, x, y, flags, param)
+    def callback(event, x, y, flags, param):
+        # Ignore everything except left mouse button clicks
+        if event != cv.EVENT_LBUTTONDOWN:
+            return
+
+        imcp = img.copy()
+        handle_click(imcp, x, y, flags, param)
+
     cv.setMouseCallback(window_name, callback)
 
     wait_reset.wait_reset(10, clicked_points, img_copy, window_name)
