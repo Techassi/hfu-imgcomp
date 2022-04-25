@@ -1,4 +1,5 @@
 from typing import Any, Literal
+from enum import Enum
 import numpy as np
 import cv2 as cv
 import operator
@@ -10,6 +11,21 @@ import utils.drawing as drawing
 import utils.images as images
 import utils.input as inp
 import calc.calc as calc
+
+
+class State(Enum):
+    FIRST_V_POINT = 0,
+    SECOND_V_POINT = 1,
+    BOTTLE_POINTS = 2,
+    MUG_POINTS = 3,
+    CALCULATION = 4
+
+
+state: State = State.FIRST_V_POINT
+second_v_point = []
+first_v_point = []
+bottle_points = []
+mug_points = []
 
 clicked_object_points = []
 world_img_copy = None
@@ -34,19 +50,41 @@ def handle_click(img, event, x, y, flags, param):
     flags : Any
     param : Any
     '''
-    global vanishing_points, clicked_points, clicked_object_points
+    global vanishing_points, clicked_points, clicked_object_points, first_v_point, state
 
     # Ignore everything except left mouse button clicks
     if event != cv.EVENT_LBUTTONDOWN:
         return
 
-    # If we have enough points to calculate and draw vanishing line
+    match state:
+        case State.FIRST_V_POINT:
+            first_v_point.append((x, y))
+
+            if len(first_v_point) == 2:
+                state = State.SECOND_V_POINT
+        case State.SECOND_V_POINT:
+            second_v_point.append(x, y)
+
+            if len(second_v_point) == 2:
+                state = State.BOTTLE_POINTS
+        case State.BOTTLE_POINTS:
+            bottle_points.append((x, y))
+
+            if len(bottle_points) == 2:
+                state = State.MUG_POINTS
+        case State.MUG_POINTS:
+            mug_points.append((x, y))
+
+            if len(mug_points) == 2:
+                state = State.CALCULATION
+
+            # If we have enough points to calculate and draw vanishing line
     if len(clicked_points) >= 8:
         return
 
     # Append point to list and draw point in image
     clicked_points.append((x, y))
-    drawing.circle(img, x, y)
+    drawing.circle(img, (x, y))
 
     # If we have an even number of points, draw line
     if len(clicked_points) % 2 == 0 and len(clicked_points) != 0:
@@ -59,7 +97,7 @@ def handle_click(img, event, x, y, flags, param):
         first_line = geometry.line_from(clicked_points[0], clicked_points[1])
         second_line = geometry.line_from(clicked_points[2], clicked_points[3])
         vanishing_point = geometry.intersection_from(first_line, second_line)
-        drawing.circle(img, vanishing_point[0], vanishing_point[1], (0, 0, 255))
+        drawing.circle(img, vanishing_point, (0, 0, 255))
         store_vanishing_points(vanishing_point)
 
     if len(vanishing_points) == 2 and len(clicked_points) == 8:
@@ -81,13 +119,7 @@ def store_vanishing_points(vanishing_point: tuple):
     global vanishing_points
 
     click.echo(f"Calculated intersection/vanishing point at: {vanishing_point}")
-
-    van_length = len(vanishing_points)
-
-    if(van_length == 0):
-        vanishing_points = [vanishing_point]
-    else:
-        vanishing_points.append(vanishing_point)
+    vanishing_points.append(vanishing_point)
 
 
 # Create world image huge enough, so that vanishing points are visible
@@ -114,7 +146,6 @@ def create_world_image(x: Any, img: Any) -> Any:
     click.echo(f"World size: ({world_width}, {world_height})")
 
     # 3D world image of calculated width & height
-
     world_img = np.zeros((world_height, world_width, 3), np.uint8)
 
     return world_img, min_world_x, min_world_y, border
@@ -142,23 +173,7 @@ def translate_world_img(img: Any,
     world_img[origin[1]:origin[1]+img_height, origin[0]:origin[0]+img_width, :] = img
     world_img_copy = world_img
 
-    draw_vans_in_world(world_img, adjusted_van_point_horiz, adjusted_van_point_vert, 'win')
-
-
-def draw_vans_in_world(world_img: Any,
-                       world_van_horiz: tuple,
-                       world_van_vert: tuple,
-                       title: str) -> None:
-
-    cv.circle(world_img, world_van_horiz, 20, (255, 0, 255), -1)
-    cv.circle(world_img, world_van_vert, 10, (0, 0, 255), -1)
-    cv.line(world_img,
-            world_van_horiz,
-            world_van_vert,
-            (0, 0, 255),
-            3,
-            cv.LINE_AA)
-    cv.imshow(title, world_img)
+    drawing.vline_world(world_img, adjusted_van_point_horiz, adjusted_van_point_vert)
 
 
 def get_v() -> tuple:
