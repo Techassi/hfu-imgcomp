@@ -1,20 +1,20 @@
 from typing import Any, Literal
-import cv2 as cv
-import click
 import numpy as np
+import cv2 as cv
 import operator
-import copy
+import click
 
-import utils.images as images
-import utils.lines as lines
-import utils.input as inp
 import utils.wait_reset as wait_reset
+import utils.geometry as geometry
+import utils.drawing as drawing
+import utils.images as images
+import utils.input as inp
 import calc.calc as calc
 
-clicked_points = []
 clicked_object_points = []
-vanishing_points = []
 world_img_copy = None
+vanishing_points = []
+clicked_points = []
 
 
 def handle_click(img, event, x, y, flags, param):
@@ -46,20 +46,20 @@ def handle_click(img, event, x, y, flags, param):
 
     # Append point to list and draw point in image
     clicked_points.append((x, y))
-    draw_circle(img, x, y)
+    drawing.circle(img, x, y)
 
     # If we have an even number of points, draw line
     if len(clicked_points) % 2 == 0 and len(clicked_points) != 0:
-        draw_line(img, clicked_points[-1], clicked_points[-2])
+        drawing.line(img, clicked_points[-1], clicked_points[-2])
 
     if len(clicked_object_points) % 2 == 0 and len(clicked_object_points) != 0:
-        draw_line(img, clicked_object_points[-1], clicked_object_points[-2])
+        drawing.line(img, clicked_object_points[-1], clicked_object_points[-2])
 
     if len(clicked_points) == 4 and len(vanishing_points) < 2:
-        first_line = lines.get_line_from(clicked_points[0], clicked_points[1])
-        second_line = lines.get_line_from(clicked_points[2], clicked_points[3])
-        vanishing_point = lines.get_intersection_pos(first_line, second_line)
-        draw_circle(img, vanishing_point[0], vanishing_point[1], (0, 0, 255))
+        first_line = geometry.line_from(clicked_points[0], clicked_points[1])
+        second_line = geometry.line_from(clicked_points[2], clicked_points[3])
+        vanishing_point = geometry.intersection_from(first_line, second_line)
+        drawing.circle(img, vanishing_point[0], vanishing_point[1], (0, 0, 255))
         store_vanishing_points(vanishing_point)
 
     if len(vanishing_points) == 2 and len(clicked_points) == 8:
@@ -74,13 +74,13 @@ def handle_click(img, event, x, y, flags, param):
         erg = calc_H() / cr
         # Magic number hey
         pixel_ratio = 0.0264583333
-        print(str(erg * pixel_ratio) + ' cm')
+        click.echo(str(erg * pixel_ratio) + ' cm')
 
 
 def store_vanishing_points(vanishing_point: tuple):
     global vanishing_points
 
-    print(f"Calculated intersection/vanishing point at: {vanishing_point}")
+    click.echo(f"Calculated intersection/vanishing point at: {vanishing_point}")
 
     van_length = len(vanishing_points)
 
@@ -101,7 +101,7 @@ def create_world_image(x: Any, img: Any) -> Any:
     min_world_y = min(min(vanishing_points, key=lambda x: x[1])[1], 0)
     max_world_y = max(max(vanishing_points, key=lambda x: x[1])[1], img_height)
 
-    print(
+    click.echo(
         f"World coords: min_x: {min_world_x}, max_x: {max_world_x}, min_y: {min_world_y}, max_y: {max_world_y}")
 
     # Pixel border so that vanishing points are fully visible
@@ -111,7 +111,7 @@ def create_world_image(x: Any, img: Any) -> Any:
     world_width = max_world_x - min_world_x + (border * 2)
     world_height = max_world_y - min_world_y + (border * 2)
 
-    print(f"World size: ({world_width}, {world_height})")
+    click.echo(f"World size: ({world_width}, {world_height})")
 
     # 3D world image of calculated width & height
 
@@ -133,10 +133,10 @@ def translate_world_img(img: Any,
     adjusted_van_point_horiz = tuple(map(operator.add, vanishing_points[0], origin))
     adjusted_van_point_vert = tuple(map(operator.add, vanishing_points[1], origin))
 
-    print(f"Origin: {origin}")
-    print(f"Width/Height: {img_width} / {img_height}")
-    print(img.shape)
-    print(
+    click.echo(f"Origin: {origin}")
+    click.echo(f"Width/Height: {img_width} / {img_height}")
+    click.echo(img.shape)
+    click.echo(
         f"Adjusted vanishing points: {adjusted_van_point_horiz}, {adjusted_van_point_vert}")
 
     world_img[origin[1]:origin[1]+img_height, origin[0]:origin[0]+img_width, :] = img
@@ -231,41 +231,3 @@ def do(base_path: str):
     cv.setMouseCallback(window_name, callback)
 
     wait_reset.wait_reset(10, clicked_points, img_copy, window_name)
-
-
-def draw_circle(img, x: int, y: int, color: tuple = (0, 0, 0)):
-    '''
-    Draw circle in 'img' at 'x' and 'y' with 'color'.
-
-    Parameters
-    ----------
-    img : Mat
-        Image matrix
-    x : int
-        X position
-    y : int
-        Y position
-    color : tuple
-        Color of the circle (Default 0, 0, 0)
-    '''
-    cv.circle(img, (x, y), 5, color, 10)
-    cv.imshow('win', img)
-
-
-def draw_line(img, a: tuple, b: tuple, color: tuple = (244, 164, 96)):
-    '''
-    Draw a line between two points 'a' and 'b' with 'color'.
-
-    Parameters
-    ----------
-    img : Mat
-        Image matrix
-    a : tuple
-        First point
-    b : tuple
-        Second point
-    color : tuple
-        Color of the line (Default 244, 164, 96)
-    '''
-    cv.line(img, a, b, color, 5)
-    cv.imshow('win', img)
