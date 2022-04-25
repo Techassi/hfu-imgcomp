@@ -1,8 +1,8 @@
 # Assignment 2
 
 Implement a script with Python and OpenCV that calculates the height of an object given a reference object placed on the
-same plane. Given three exemplary images (images\table_bottle_*.jpg) of a table showing two objects - a bottle and a
-mug. The bottle has a height* of 26 cm. Calculate the height of the mug in cm. Write a readme file that explains what
+same plane. Given three exemplary images (images\table_bottle_.jpg) of a table showing two objects - a bottle and a
+mug. The bottle has a height of 26 cm. Calculate the height of the mug in cm. Write a readme file that explains what
 you have done and how to run the script and what the script does.
 
 ## Getting started
