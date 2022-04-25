@@ -2,7 +2,7 @@ from typing import Tuple
 import numpy as np
 
 
-def get_line_from(a: tuple, b: tuple) -> np.ndarray:
+def line_from(a: tuple, b: tuple) -> np.ndarray:
     '''
     Calculate a line between two points.
 
@@ -21,7 +21,7 @@ def get_line_from(a: tuple, b: tuple) -> np.ndarray:
     return np.cross((a[0], a[1], 1), (b[0], b[1], 1))
 
 
-def get_intersection_pos(a: np.ndarray, b: np.ndarray) -> Tuple[int, int]:
+def intersection_from(a: np.ndarray, b: np.ndarray) -> Tuple[int, int]:
     '''
     Calculate the intersection position of two lines.
 
