@@ -13,30 +13,13 @@ import utils.input as inp
 import calc.calc as calc
 
 
-class State(Enum):
-    FIRST_V_POINT = 0,
-    SECOND_V_POINT = 1,
-    BOTTLE_POINTS = 2,
-    MUG_POINTS = 3,
-    CALCULATION = 4
-
-
 clicked_object_points = []
 world_img_copy = None
 vanishing_points = []
 clicked_points = []
 
-state: State = State.FIRST_V_POINT
-render_data = {
-    'f_list': [],  # First lines points
-    's_list': [],  # Second lines points
-    'b_list': [],  # Bottle points
-    'm_list': [],  # Mug points
-    'v_list': [],  # Vanishing points
-}
 
-
-def handle_click(img: any, x: int, y: int, flags: any, param: any):
+def handle_click(img: any, event: any, x: int, y: int, flags: any, param: any):
     '''
     Handle left mouse button click.
 
@@ -51,48 +34,11 @@ def handle_click(img: any, x: int, y: int, flags: any, param: any):
     flags : Any
     param : Any
     '''
-    global vanishing_points, clicked_points, clicked_object_points, state, render_data
+    global vanishing_points, clicked_points, clicked_object_points
 
-    # State machine
-    match state:
-        case State.FIRST_V_POINT:
-            render_data['f_list'].append((x, y))
-
-            if len(render_data['f_list']) == 4:
-                # Calculate and append first vanishing point
-                vpoint = geometry.vpoint_from(render_data['f_list'])
-                render_data['v_list'].append(vpoint)
-
-                # Change state
-                state = State.SECOND_V_POINT
-                click.echo('Select second pair of lines')
-        case State.SECOND_V_POINT:
-            render_data['s_list'].append((x, y))
-
-            if len(render_data['s_list']) == 4:
-                # Calculate and append second vanishing point
-                vpoint = geometry.vpoint_from(render_data['s_list'])
-                render_data['v_list'].append(vpoint)
-
-                # Change state
-                state = State.BOTTLE_POINTS
-                click.echo('Select height of bottle')
-        case State.BOTTLE_POINTS:
-            render_data['b_list'].append((x, y))
-
-            if len(render_data['b_list']) == 2:
-                # TODO (Techassi): Calculate pixel to cm ratio based on the known size of the bottle
-                state = State.MUG_POINTS
-                click.echo('Select height of mug')
-        case State.MUG_POINTS:
-            render_data['m_list'].append((x, y))
-
-            if len(render_data['m_list']) == 2:
-                # TODO (Techassi): Calculate mug height and draw final image
-                pass
-
-    drawing.render_image(img, render_data)
-    return
+    # Ignore everything except left mouse button clicks
+    if event != cv.EVENT_LBUTTONDOWN:
+        return
 
     if len(clicked_object_points) % 2 == 0 and len(clicked_object_points) != 0:
         drawing.line(img, clicked_object_points[-1], clicked_object_points[-2])
@@ -246,13 +192,7 @@ def do(base_path: str):
     cv.namedWindow(window_name, cv.WINDOW_GUI_NORMAL)
     cv.imshow(window_name, img)
 
-    def callback(event, x, y, flags, param):
-        # Ignore everything except left mouse button clicks
-        if event != cv.EVENT_LBUTTONDOWN:
-            return
-
-        imcp = img.copy()
-        handle_click(imcp, x, y, flags, param)
+    def callback(event, x, y, flags, param): handle_click(img, event, x, y, flags, param)
 
     cv.setMouseCallback(window_name, callback)
 
