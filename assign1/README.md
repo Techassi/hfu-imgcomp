@@ -5,15 +5,7 @@ reference images.
 
 ## Getting started
 
-To install all required dependencies consult [this](../README.md#setup) section. The core dependencies for this
-assignment are:
-
-- OpenCV: `opencv-python`. A wrapper package for OpenCV python bindings. OpenCV is a library of programming functions
-  mainly aimed at real-time computer vision. ([PyPI](https://pypi.org/project/opencv-python/))
-- Numpy: `numpy`. Package for multi-dimensional arrays and matrices and a large collection of math operations on these
-  data structures. ([PyPI](https://pypi.org/project/numpy/))
-- Click: `click`. Click is a Python package for creating beautiful command line interfaces in a composable way with as
-  little code as necessary. ([PyPI](https://pypi.org/project/click/))
+To install all required dependencies consult [this](../README.md#setup) section.
 
 All dependencies (which include indirect dependencies) and their exact version numbers can be found in
 [requirements.txt](../requirements.txt). After the installation of the dependencies, we `cd` into the `assign1` folder
@@ -24,7 +16,7 @@ cd assign1
 
 ## Usage
 
-For a quick overview off all commands run
+For a quick overview of all commands run
 
 ```shell
 python main.py --help

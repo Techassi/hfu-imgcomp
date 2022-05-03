@@ -40,3 +40,25 @@ def intersection_from(a: np.ndarray, b: np.ndarray) -> Tuple[int, int]:
     pos = np.cross(a, b)
     pos = pos / pos[2]
     return (round(pos[0]), round(pos[1]))
+
+
+def vpoint_from(points: list) -> Tuple[int, int]:
+    '''
+    Calculate vanishing point from 4 seperate points in a list.
+
+    Parameters
+    ----------
+    points : list
+        List of 4 seperate points
+
+    Returns
+    -------
+    vpoint : tuple
+        The vanishing point
+    '''
+    if len(points) != 4:
+        return
+
+    p = line_from(points[0], points[1])
+    q = line_from(points[2], points[3])
+    return intersection_from(p, q)
