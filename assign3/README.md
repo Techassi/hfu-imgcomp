@@ -1,5 +1,8 @@
 # Assignment 3
 
+Implement a script with Python and OpenCV that computes a depth map from at least three images. Write a readme file that
+explains what you have done and how to run the script and what the script does.
+
 ## Getting started
 
 To install all required dependencies consult [this](../README.md#setup) section.
