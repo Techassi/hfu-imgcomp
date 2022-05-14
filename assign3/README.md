@@ -27,3 +27,9 @@ To retrieve usage information on each subcommand run
 ```shell
 python main.py <COMMAND> --help
 ```
+
+## References
+
+- [https://docs.opencv2.org/4.5.5/da/de9/tutorial_py_epipolar_geometry.html](https://docs.opencv2.org/4.5.5/da/de9/tutorial_py_epipolar_geometry.html)
+- [https://www.andreasjakl.com/understand-and-apply-stereo-rectification-for-depth-maps-part-2/](https://www.andreasjakl.com/understand-and-apply-stereo-rectification-for-depth-maps-part-2/)
+- [https://github.com/uhahne/BildComp-SoSe2022](https://github.com/uhahne/BildComp-SoSe2022)
