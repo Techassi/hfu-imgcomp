@@ -28,6 +28,16 @@ To retrieve usage information on each subcommand run
 python main.py <COMMAND> --help
 ```
 
+### Intrinsic camera matrix
+
+This subcommand calculates the intrinsic camera matrix based on known values and EXIF data present in the source image.
+
+```shell
+python main.py matrix
+# or
+python main.py matrix -p / --path .data
+```
+
 ## References
 
 - [https://docs.opencv2.org/4.5.5/da/de9/tutorial_py_epipolar_geometry.html](https://docs.opencv2.org/4.5.5/da/de9/tutorial_py_epipolar_geometry.html)
