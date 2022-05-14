@@ -108,6 +108,7 @@ def get_keypoints(imgs: List[cv.Mat]) -> KeypointDescriptorList:
 
 def match_keypoints(kd_list: KeypointDescriptorList, trees: int = 5, checks: int = 5, k: int = 2) -> FlannMatchesList:
     ''''''
+    # TODO (Techassi): Ask about the number of matches. Should they really be that HIGH? /shrug
     # Setup flann matcher params
     FLANN_INDEX_KDTREE = 1
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=trees)
