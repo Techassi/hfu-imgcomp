@@ -1,11 +1,12 @@
 from typing import List
+import numpy as np
 import cv2 as cv
 import click
 
 import features.features as features
+import utils.drawing as drawing
 import utils.images as images
 import utils.input as inp
-import utils.wait as wait
 
 
 def execute(base_path: str, preview: bool):
@@ -18,7 +19,7 @@ def execute(base_path: str, preview: bool):
 
     # Prompt the user to select 2 images
     indices = inp.enforce_multi_range_input(
-        f'Enter number between 1 and {len(img_paths)} to select image to use: ', 1, len(img_paths), 2)
+        f'Enter number between 1 and {len(img_paths)} to select image to use: ', 1, len(img_paths), 3)
 
     # Collect selected image paths
     selected_img_paths: List[str] = []
@@ -31,25 +32,21 @@ def execute(base_path: str, preview: bool):
         click.echo(f'Failed to load images: {err.message}')
         return
 
-    keypoints_descriptor_list = features.get_keypoints(imgs)
-    flann_matches_list = features.match_keypoints(keypoints_descriptor_list)
-    filtered_matches_list = features.filter_matches(keypoints_descriptor_list, flann_matches_list)
+    # Get epilines, one function call is just all it takes
+    epilines_list = features.get_epilines(imgs)
 
-    # for i, combi in enumerate(keypoints_descriptor_list):
-    #     print('We found {} keypoints in the first image and {} keypoints in the second image'.format(
-    #         len(combi[0][0]),
-    #         len(combi[0][1]))
-    #     )
-
-    #     if preview:
-    #         # Visualize the found points in a preview window
-    #         cv.namedWindow('preview', cv.WINDOW_NORMAL)
-    #         img_with_points = cv.drawKeypoints(
-    #             imgs[i],
-    #             combi[0][0],
-    #             None,
-    #             flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
-    #         )
-    #         cv.imshow('preview', img_with_points)
-    #         if wait.wait_or(0):
-    #             continue
+    for c in epilines_list:
+        print(f'Combi: {c[1][0]} with {c[1][1]}')
+        print(f'Lines in left {len(c[0][0])}')
+        print(f'Lines in right {len(c[0][1])}')
+        img1 = drawing.epilines(
+            imgs[c[1][1]],
+            c[0][0]
+        )
+        img2 = drawing.epilines(
+            imgs[c[1][0]],
+            c[0][1]
+        )
+        cv.namedWindow('preview', cv.WINDOW_NORMAL)
+        cv.imshow('preview', np.concatenate((img1, img2), axis=1))
+        cv.waitKey(0)

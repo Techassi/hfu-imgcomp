@@ -1,10 +1,9 @@
-from typing import List, Tuple, TypeAlias
+from typing import List, Tuple
+import numpy as np
 import cv2 as cv
 import os
 
-KeypointDescriptorList: TypeAlias = List[Tuple[List[cv.KeyPoint], List[List[float]]]]
-FlannMatchesList: TypeAlias = List[Tuple[Tuple[cv.DMatch, cv.DMatch]]]
-FilteredMatchesList: TypeAlias = List[Tuple[List, List]]
+from .types import EpilinesList, FilteredMatchesList, FlannMatchesList, FundamentalMatricesList, KeypointDescriptorList
 
 
 class FeaturesError:
@@ -34,6 +33,7 @@ def load_images(paths: List[str]) -> Tuple[List[cv.Mat], FeaturesError]:
 
         try:
             img = cv.imread(path, cv.IMREAD_GRAYSCALE)
+            # img = cv.resize(img, (0, 0), fx=0.5, fy=0.5)
             images.append(img)
         except:
             return images, FeaturesError(f'Failed to read image at {path}')
@@ -92,14 +92,15 @@ def get_keypoints(imgs: List[cv.Mat]) -> KeypointDescriptorList:
     keypoints_descriptor_list: KeypointDescriptorList = []
     for i, c in enumerate(combis):
         for j in c:
-            print(i, j)
-            # [ Tuple [ List [kpoints_in_i, kpoints_in_j], List [des_in_i, des_in_j] ] ]
+            # [ Tuple [ List [ List[kpoints_in_i], List[kpoints_in_j] ], List [des_in_i, des_in_j] ] ]
             kpoints_in_i, des_in_i = sift.detectAndCompute(imgs[i], None)
             kpoints_in_j, des_in_j = sift.detectAndCompute(imgs[j], None)
+
             keypoints_descriptor_list.append(
                 (
-                    [kpoints_in_i, kpoints_in_j],
-                    [des_in_i, des_in_j]
+                    [list(kpoints_in_i), list(kpoints_in_j)],
+                    [des_in_i, des_in_j],
+                    (i, j)
                 )
             )
 
@@ -121,29 +122,115 @@ def match_keypoints(kd_list: KeypointDescriptorList, trees: int = 5, checks: int
     matches: FlannMatchesList = []
     for combi in kd_list:
         kp_matches = flann_Matcher.knnMatch(combi[1][0], combi[1][1], k=k)
-        matches.append(kp_matches)
+        matches.append((kp_matches, combi[2]))
 
     return matches
 
 
 def filter_matches(kd_list: KeypointDescriptorList, fm_list: FlannMatchesList) -> FilteredMatchesList:
-    ''''''
-    # TODO (Techassi): Iterate over kd_list and the find the points in the matches list. Dont iterate over fm_list first
+    '''
+    Filter matches based on distance to each other.
+
+    Parameters
+    ----------
+    kd_list : KeypointDescriptorList
+        A list of keypoints and descriptors for each combination
+    fm_list : 
+        A list of matched keypoints for each combination
+
+    Returns
+    -------
+    filtered_matches : FilteredMatchesList
+        A list of filtered matches for each combination
+    '''
     filtered_matches: FilteredMatchesList = []
-    for i, matches in enumerate(fm_list):
-        points_in_left = []
+
+    for i, kd in enumerate(kd_list):
+        matchesMask = [[0, 0] for k in range(len(fm_list[i][0]))]
         points_in_right = []
+        points_in_left = []
 
-        for j, (m, n) in enumerate(matches):
+        for j, (m, n) in enumerate(fm_list[i][0]):
             if m.distance < 0.8*n.distance:
-                matchesMask = [[0, 0] for j in range(len(matches))]
-                matchesMask[i] = [1, 0]
+                matchesMask[j] = [1, 0]
 
-                # points_in_left.append(kd_list[i][0])
-                print(len(kd_list[i][0]), m.queryIdx)
-                # print(kd_list[i][0][m.queryIdx].pt)
+                points_in_right.append(kd[0][1][m.trainIdx].pt)
+                points_in_left.append(kd[0][0][m.queryIdx].pt)
 
-                # filtered_matches[i]
+        filtered_matches.append(
+            (
+                np.int32(points_in_left),
+                np.int32(points_in_right),
+                matchesMask,
+                fm_list[i][1]
+            )
+        )
 
-                # pts1.append(kp1[m.queryIdx].pt)
-                # pts2.append(kp2[m.trainIdx].pt)
+    return filtered_matches
+
+
+def get_fundamental_matrices(fm_list: FilteredMatchesList) -> FundamentalMatricesList:
+    '''
+    Find fundamental matrix for each combination.
+
+    Parameters
+    ----------
+    fm_list : FilteredMatchesList
+        A list of filtered matches for each combination
+
+    Returns
+    -------
+    list : FundamentalMatricesList
+        A list of the fundamental matrix, the mask, and inlier points (left and right) for each combination
+    '''
+    m_list: FundamentalMatricesList = []
+
+    for m in fm_list:
+        f, mask = cv.findFundamentalMat(m[0], m[1], cv.FM_RANSAC)
+        points_in_right = m[1][mask.ravel() == 1]
+        points_in_left = m[0][mask.ravel() == 1]
+
+        m_list.append((f, mask, points_in_left, points_in_right, m[3]))
+
+    return m_list
+
+
+def compute_epilines(fm_list: FundamentalMatricesList) -> EpilinesList:
+    '''
+    Compute the epilines for the left and right image of all combinations.
+
+    Parameters
+    ----------
+    fm_list : FundamentalMatricesList
+        A list of the fundamental matrix, the mask, and inlier points (left and right)
+
+    Returns
+    -------
+    epilines_list : EpilinesList
+        A list of epilines (left and right) for each combination
+    '''
+    epilines_list: EpilinesList = []
+    for item in fm_list:
+        right_lines = cv.computeCorrespondEpilines(item[3].reshape(-1, 1, 2), 2, item[0])
+        right_lines = right_lines.reshape(-1, 3)
+
+        left_lines = cv.computeCorrespondEpilines(item[2].reshape(-1, 1, 2), 1, item[0])
+        left_lines = left_lines.reshape(-1, 3)
+
+        epilines_list.append(
+            (
+                (left_lines, right_lines),
+                item[4]
+            )
+        )
+
+    return epilines_list
+
+
+def get_epilines(imgs: List[cv.Mat]) -> EpilinesList:
+    ''''''
+    kp_list = get_keypoints(imgs)
+    mk_list = match_keypoints(kp_list)
+    fm_list = filter_matches(kp_list, mk_list)
+    m_list = get_fundamental_matrices(fm_list)
+    return compute_epilines(m_list)

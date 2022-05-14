@@ -21,4 +21,4 @@ def execute(base_path: str):
         click.echo(f'Failed to calculate intrinsic matrix: {err.message}')
         return
 
-    print(m)
+    click.echo(m)
