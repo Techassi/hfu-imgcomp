@@ -1,6 +1,7 @@
 # External packages
 import click
 
+import cmd.features as features
 import cmd.matrix as matrix
 
 
@@ -22,6 +23,14 @@ def matrix_cmd(path: str):
     Calculate the intrinsic camera matrix.
     '''
     matrix.execute(path)
+
+
+@cli.command('features')
+@click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
+@click.option('--preview', default=False, help='Show preview windows', type=bool, show_default=True, is_flag=True)
+def features_cmd(path: str, preview: bool):
+    ''''''
+    features.execute(path, preview)
 
 
 @cli.command('depth')
