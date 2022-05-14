@@ -1,4 +1,3 @@
-import numpy as np
 import click
 
 import utils.images as images
