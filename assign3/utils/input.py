@@ -1,6 +1,5 @@
+from typing import List, Tuple
 import click
-
-from typing import Tuple
 
 
 def range_input(message: str, min: int, max: int, verbose: bool = True) -> Tuple[int, bool]:
@@ -70,3 +69,37 @@ def enforce_range_input(message: str, min: int, max: int) -> int:
         v, ok = range_input(message, min, max, False)
 
     return v
+
+
+def enforce_multi_range_input(message: str, min: int, max: int, required_inputs: int) -> List[int]:
+    '''
+    Retrieve multiple integer inputs between 'min' and 'max' from the user.
+    If the user provides an invalid input or the provided value is already selected, try again.
+
+    Parameters
+    ----------
+    message : str
+        Message to display for the input prompt
+    min : int
+        Minimum value of range
+    max : int
+        Maximum value of range
+
+    Returns
+    -------
+    values : List[int]
+        List of valid input values
+    '''
+    inputs: List[int] = []
+    n = 0
+
+    while n < required_inputs:
+        v = enforce_range_input(message, min, max)
+        if v in inputs:
+            click.echo('Already selected. Try again')
+            continue
+
+        inputs.append(v)
+        n += 1
+
+    return inputs
