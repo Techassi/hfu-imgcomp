@@ -1,8 +1,9 @@
-import numpy as np
 import cv2 as cv
 import click
 
-import geometry.geometry as geometry
+import geometry.rectification as grect
+import geometry.dmaps as gdmaps
+
 import features.features as features
 import utils.input as inp
 
@@ -21,7 +22,7 @@ def single(
     imgs = inp.handle_images(base_path, preview)
 
     # Construct stereo params
-    params = geometry.sgbm_params(
+    params = gdmaps.sgbm_params(
         speckle_size,
         speckle_range,
         min_disp,
@@ -35,10 +36,10 @@ def single(
     fm_list = features.get_fundamental_matrices(imgs)
 
     click.echo('Rectifying...')
-    rm_list = geometry.rectify(imgs, fm_list)
+    rm_list = grect.rectify(imgs, fm_list)
 
     click.echo('Computing depth maps...')
-    dm_list = geometry.depth_maps_single(imgs, rm_list, params)
+    dm_list = gdmaps.depth_maps_single(imgs, rm_list, params)
 
     for dm in dm_list:
         cv.namedWindow('disparity', cv.WINDOW_NORMAL)
@@ -60,7 +61,7 @@ def multi(
     imgs = inp.handle_images(base_path, preview)
 
     # Construct stereo params
-    sgbm_params = geometry.sgbm_params(
+    sgbm_params = gdmaps.sgbm_params(
         speckle_size,
         speckle_range,
         min_disp,
@@ -70,16 +71,16 @@ def multi(
         block_size
     )
 
-    bm_params = geometry.bm_params(num_disp, block_size)
+    bm_params = gdmaps.bm_params(num_disp, block_size)
 
     click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
     fm_list = features.get_fundamental_matrices(imgs)
 
     click.echo('Rectifying...')
-    rm_list = geometry.rectify(imgs, fm_list)
+    rm_list = grect.rectify(imgs, fm_list)
 
     click.echo('Computing and combining depth maps...')
-    dm_list = geometry.depth_maps_multi(imgs, rm_list, bm_params, sgbm_params)
+    dm_list = gdmaps.depth_maps_multi(imgs, rm_list, bm_params, sgbm_params)
 
     for dm in dm_list:
         cv.namedWindow('disparity', cv.WINDOW_NORMAL)

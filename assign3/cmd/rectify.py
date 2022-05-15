@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import click
 
-import geometry.geometry as geometry
+import geometry.rectification as grect
 import features.features as features
 import utils.input as inp
 
@@ -14,7 +14,7 @@ def execute(base_path: str, preview: bool, thresh: int):
     fm_list = features.get_fundamental_matrices(imgs)
 
     click.echo('Rectifying...')
-    rm_list = geometry.rectify(imgs, fm_list, thresh)
+    rm_list = grect.rectify(imgs, fm_list, thresh)
 
     cv.namedWindow('rectify', cv.WINDOW_NORMAL)
 

@@ -1,16 +1,9 @@
-# External packages
 import click
 
 import cmd.features as features
 import cmd.rectify as rectify
 import cmd.matrix as matrix
 import cmd.dmap as dmap
-
-# Intrinsische Matrix aus EXIF Daten
-# Fundamental Matrix erstellen
-# Rektifizieren
-# Stereo Algos anwenden
-# Depth map
 
 
 @click.group()
@@ -120,7 +113,8 @@ def single_map_cmd(
 @click.option('--num-disp', default=64, help='Number of disparities', type=int, show_default=True)
 @click.option('--disp-diff', default=1, help='Disparity 1-2 max diff', type=int, show_default=True)
 @click.option('--unique-ratio', default=10, help='Uniqueness ratio', type=int, show_default=True)
-@click.option('--block-size', default=8, help='Block size', type=int, show_default=True)
+# This needs to be the same as SADWindowSize (which defaults to 21), see https://answers.opencv.org/question/185947/how-to-resolve-a-sadwindowsize-error/
+@click.option('--block-size', default=21, help='Block size', type=int, show_default=True)
 def multi_map_cmd(
     path: str,
     preview: bool,
