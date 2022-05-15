@@ -3,7 +3,7 @@ import numpy as np
 import cv2 as cv
 import os
 
-from .types import EpilinesList, FilteredMatchesList, FlannMatchesList, FundamentalMatricesList, KeypointDescriptorList
+from .types import EpilinesList, FilteredMatchesList, FlannMatchesList, FundamentalMatricesList, KeypointDescriptorList, PointsList
 
 
 class FeaturesError:
@@ -228,9 +228,55 @@ def compute_epilines(fm_list: FundamentalMatricesList) -> EpilinesList:
 
 
 def get_epilines(imgs: List[cv.Mat]) -> EpilinesList:
-    ''''''
+    '''
+    Calculate epilines from a set of images.
+
+    Parameters
+    ----------
+    imgs : List[cv.Mat]
+        List of image matrices
+
+    Returns
+    -------
+    epilines : EpilinesList
+         A list of epilines for each combination of images
+    '''
     kp_list = get_keypoints(imgs)
     mk_list = match_keypoints(kp_list)
     fm_list = filter_matches(kp_list, mk_list)
     m_list = get_fundamental_matrices(fm_list)
     return compute_epilines(m_list)
+
+
+def get_points(imgs: List[cv.Mat]) -> PointsList:
+    '''
+    Find matching points in a set of two images for every combination.
+
+    Parameters
+    ----------
+    imgs : List[cv.Mat]
+        List of image matrices
+
+    Returns
+    -------
+    epilines : PointsList
+         A list of matching points for each combination of images
+    '''
+    points_list = []
+
+    kp_list = get_keypoints(imgs)
+    mk_list = match_keypoints(kp_list)
+    fm_list = filter_matches(kp_list, mk_list)
+
+    for i, k in enumerate(kp_list):
+        points_list.append(
+            (
+                k[0][0],
+                k[0][1],
+                mk_list[i][0],
+                fm_list[i][2],
+                k[2]
+            )
+        )
+
+    return points_list

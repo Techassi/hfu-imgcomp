@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import numpy as np
 import cv2 as cv
 
@@ -13,3 +14,23 @@ def epilines(img, lines):
         x1, y1 = map(int, [c, -(r[2]+r[0]*c)/r[1]])
         img = cv.line(img, (x0, y0), (x1, y1), color, 1)
     return img
+
+
+def matching_keypoints(
+    img_l: cv.Mat,
+    kp_l: List[cv.KeyPoint],
+    img_r: cv.Mat,
+    kp_r: List[cv.KeyPoint],
+    matches: Tuple[Tuple[cv.DMatch, cv.DMatch]],
+    mask: List[List[int]]
+) -> cv.Mat:
+    '''
+    Draw connecting lines for matched points.
+    '''
+    params = dict(
+        flags=cv.DrawMatchesFlags_DEFAULT,
+        singlePointColor=(255, 0, 0),
+        matchColor=(0, 255, 0),
+        matchesMask=mask
+    )
+    return cv.drawMatchesKnn(img_l, kp_l, img_r, kp_r, matches, None, **params)

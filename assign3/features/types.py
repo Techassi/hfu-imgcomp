@@ -42,3 +42,13 @@ EpilinesList: TypeAlias = List[
         Tuple[int, int]
     ]
 ]
+
+PointsList: TypeAlias = List[
+    Tuple[
+        List[cv.KeyPoint],
+        List[cv.KeyPoint],
+        Tuple[Tuple[cv.DMatch, cv.DMatch]],
+        List[List[int]],
+        Tuple[int, int]
+    ]
+]
