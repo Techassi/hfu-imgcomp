@@ -85,7 +85,23 @@ def get_keypoints(imgs: ImageList) -> KeypointDescriptorList:
 
 
 def match_keypoints(kd_list: KeypointDescriptorList, trees: int = 5, checks: int = 5, k: int = 2) -> FlannMatchesList:
-    ''''''
+    '''
+    Match two sets of keypoints to each other via KNN.
+
+    Parameters
+    ----------
+    kd_list : KeypointDescriptorList
+        A list of keypoints and descriptors for each combination
+    trees : int
+        Number of trees the Flann bases matcher uses (default 5)
+    checks : int
+        Number of checks the matcher uses (default 5)
+    k : int
+        Whatever this is? (default 2)
+
+    matches : FlannMatchesList
+        List of matched keypoints for each combination
+    '''
     # TODO (Techassi): Ask about the number of matches. Should they really be that HIGH? /shrug
     # Setup flann matcher params
     FLANN_INDEX_KDTREE = 1
@@ -260,7 +276,19 @@ def get_points(imgs: ImageList) -> PointsList:
 
 
 def get_fundamental_matrices(imgs: ImageList) -> FundamentalMatricesList:
-    ''''''
+    '''
+    Get the fundamental matrix for each of the combinations.
+
+    Parameters
+    ----------
+    img : ImageList
+        List of images (matrices)
+
+    Returns
+    -------
+    fm_list : FundamentalMatricesList
+        A list of fundamental matrices
+    '''
     kp_list = get_keypoints(imgs)
     mk_list = match_keypoints(kp_list)
     fm_list = filter_matches(kp_list, mk_list)
