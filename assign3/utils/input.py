@@ -90,11 +90,13 @@ def enforce_multi_range_input(message: str, min: int, max: int, required_inputs:
     values : List[int]
         List of valid input values
     '''
+    click.echo(f'A selection of {required_inputs} item(s) is needed\n')
+
     inputs: List[int] = []
     n = 0
 
     while n < required_inputs:
-        v = enforce_range_input(message, min, max)
+        v = enforce_range_input(f'[{n + 1}/{required_inputs}] {message}', min, max)
         if v in inputs:
             click.echo('Already selected. Try again')
             continue
