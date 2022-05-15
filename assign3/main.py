@@ -2,7 +2,9 @@
 import click
 
 import cmd.features as features
+import cmd.rectify as rectify
 import cmd.matrix as matrix
+import cmd.dmap as dmap
 
 # Intrinsische Matrix aus EXIF Daten
 # Fundamental Matrix erstellen
@@ -41,6 +43,16 @@ def matrix_cmd(path: str):
     matrix.execute(path)
 
 
+@cli.command('rectify')
+@click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
+@click.option('--preview', default=False, help='Show preview windows', type=bool, show_default=True, is_flag=True)
+def rectify_cmd(path: str, preview: bool):
+    '''
+    Rectify two or more images.
+    '''
+    rectify.execute(path, preview)
+
+
 @features_group.command('lines')
 @click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
 @click.option('--preview', default=False, help='Show preview windows', type=bool, show_default=True, is_flag=True)
@@ -62,11 +74,13 @@ def points_cmd(path: str, preview: bool):
 
 
 @map_group.command('single')
-def single_map_cmd():
+@click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
+@click.option('--preview', default=False, help='Show preview windows', type=bool, show_default=True, is_flag=True)
+def single_map_cmd(path: str, preview: bool):
     '''
     Compute a single depth map from two images.
     '''
-    pass
+    dmap.single(path, preview)
 
 
 @map_group.command('multi')

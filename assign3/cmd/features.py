@@ -5,12 +5,11 @@ import click
 
 import features.features as features
 import utils.drawing as drawing
-import utils.images as images
 import utils.input as inp
 
 
 def epilines(base_path: str, preview: bool):
-    imgs = handle_images(base_path, preview)
+    imgs = inp.handle_images(base_path, preview)
 
     # Get epilines, one function call is just all it takes
     click.echo('\nExtracting epilines. This takes a few seconds...\n')
@@ -40,7 +39,7 @@ def epilines(base_path: str, preview: bool):
 
 
 def points(base_path: str, preview: bool):
-    imgs = handle_images(base_path, preview)
+    imgs = inp.handle_images(base_path, preview)
 
     # Get matching points
     click.echo('\nExtracting matching points. This takes a few seconds...\n')
@@ -59,37 +58,3 @@ def points(base_path: str, preview: bool):
         cv.waitKey(0)
 
     cv.destroyAllWindows()
-
-
-def handle_images(base_path: str, preview: bool) -> List[cv.Mat]:
-    img_paths, ok = images.list(base_path)
-    if not ok:
-        click.echo('No images found')
-
-    images.print_list(img_paths)
-
-    # Prompt the user to select 2 images
-    indices = inp.enforce_multi_range_input(
-        f'Enter number between 1 and {len(img_paths)} to select image to use: ', 1, len(img_paths), 3)
-
-    # Collect selected image paths
-    selected_img_paths: List[str] = []
-    for index in indices:
-        selected_img_paths.append(img_paths[index - 1])
-
-    # Load images with OpenCV
-    imgs, err = features.load_images(selected_img_paths)
-    if err != None:
-        click.echo(f'Failed to load images: {err.message}')
-        return
-
-    # Show preview if --preview is passed
-    if preview:
-        cv.namedWindow('preview', cv.WINDOW_NORMAL)
-        for img in imgs:
-            cv.imshow('preview', img)
-            cv.waitKey(0)
-
-        cv.destroyAllWindows()
-
-    return imgs
