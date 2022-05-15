@@ -35,7 +35,29 @@ This subcommand calculates the intrinsic camera matrix based on known values and
 ```shell
 python main.py matrix
 # or
-python main.py matrix -p / --path .data
+python main.py matrix -p .data
+```
+
+### Feature extraction
+
+This subcommand extracts epilines from multiple images and displays the result in a window:
+
+```shell
+python main.py features lines
+# or
+python main.py features lines -p .data
+# or
+python main.py features lines -p .data --preview
+```
+
+This subcommand extracts matching points from multiple images and displays the result in a window:
+
+```shell
+python main.py features points
+# or
+python main.py features points -p .data
+# or
+python main.py features points -p .data --preview
 ```
 
 ## References
