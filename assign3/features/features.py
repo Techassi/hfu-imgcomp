@@ -1,9 +1,16 @@
-from typing import List, Tuple
 import numpy as np
 import cv2 as cv
-import os
 
-from .types import EpilinesList, FilteredMatchesList, FlannMatchesList, FundamentalMatricesList, KeypointDescriptorList, PointsList
+from thints.images import ImageList
+from thints.features import (
+    FundamentalMatricesList,
+    KeypointDescriptorList,
+    FilteredMatchesList,
+    FlannMatchesList,
+    CombinationsList,
+    EpilinesList,
+    PointsList
+)
 
 
 class FeaturesError:
@@ -11,51 +18,21 @@ class FeaturesError:
         self.message = message
 
 
-def load_images(paths: List[str]) -> Tuple[List[cv.Mat], FeaturesError]:
-    '''
-    Load n images from 'paths' via OpenCV at the same time in grayscale.
-
-    Parameters
-    ----------
-    paths : List[str]
-        List of image paths
-
-    Returns
-    -------
-    result : Tuple[List[any], FeaturesError]
-        List of images (matrices) or an error
-    '''
-    images = []
-
-    for path in paths:
-        if not os.path.exists(path):
-            return images, FeaturesError(f'Image at {path} does not exist')
-
-        try:
-            img = cv.imread(path, cv.IMREAD_GRAYSCALE)
-            # img = cv.resize(img, (0, 0), fx=0.5, fy=0.5)
-            images.append(img)
-        except:
-            return images, FeaturesError(f'Failed to read image at {path}')
-
-    return images, None
-
-
-def get_combinations(imgs: List[cv.Mat]) -> List[List[int]]:
+def get_combinations(imgs: ImageList) -> CombinationsList:
     '''
     Return all possible image combinations.
 
     Parameters
     ----------
-    imgs : List[cv.Mat]
+    imgs : ImageList
         List of images
 
     Returns
     -------
-    combis : List[List[int]]
+    combis : CombinationsList
         A list of a list of combinations
     '''
-    combinations: List[List[int]] = []
+    combinations: CombinationsList = []
 
     for i, _ in enumerate(imgs):
         if i == len(imgs) - 1:
@@ -68,13 +45,13 @@ def get_combinations(imgs: List[cv.Mat]) -> List[List[int]]:
     return combinations
 
 
-def get_keypoints(imgs: List[cv.Mat]) -> KeypointDescriptorList:
+def get_keypoints(imgs: ImageList) -> KeypointDescriptorList:
     '''
     Return a list of keypoints and descriptors for each combination.
 
     Parameters
     ----------
-    imgs : List[cv.Mat]
+    imgs : ImageList
         List of images
 
     Returns
@@ -169,7 +146,7 @@ def filter_matches(kd_list: KeypointDescriptorList, fm_list: FlannMatchesList) -
     return filtered_matches
 
 
-def get_fundamental_matrices(fm_list: FilteredMatchesList) -> FundamentalMatricesList:
+def find_fundamental_matrices(fm_list: FilteredMatchesList) -> FundamentalMatricesList:
     '''
     Find fundamental matrix for each combination.
 
@@ -227,13 +204,13 @@ def compute_epilines(fm_list: FundamentalMatricesList) -> EpilinesList:
     return epilines_list
 
 
-def get_epilines(imgs: List[cv.Mat]) -> EpilinesList:
+def get_epilines(imgs: ImageList) -> EpilinesList:
     '''
     Calculate epilines from a set of images.
 
     Parameters
     ----------
-    imgs : List[cv.Mat]
+    imgs : ImageList
         List of image matrices
 
     Returns
@@ -244,17 +221,17 @@ def get_epilines(imgs: List[cv.Mat]) -> EpilinesList:
     kp_list = get_keypoints(imgs)
     mk_list = match_keypoints(kp_list)
     fm_list = filter_matches(kp_list, mk_list)
-    m_list = get_fundamental_matrices(fm_list)
-    return compute_epilines(m_list)
+    fm_list = find_fundamental_matrices(fm_list)
+    return compute_epilines(fm_list)
 
 
-def get_points(imgs: List[cv.Mat]) -> PointsList:
+def get_points(imgs: ImageList) -> PointsList:
     '''
     Find matching points in a set of two images for every combination.
 
     Parameters
     ----------
-    imgs : List[cv.Mat]
+    imgs : ImageList
         List of image matrices
 
     Returns
@@ -280,3 +257,12 @@ def get_points(imgs: List[cv.Mat]) -> PointsList:
         )
 
     return points_list
+
+
+def get_fundamental_matrices(imgs: ImageList) -> FundamentalMatricesList:
+    ''''''
+    kp_list = get_keypoints(imgs)
+    mk_list = match_keypoints(kp_list)
+    fm_list = filter_matches(kp_list, mk_list)
+    fm_list = find_fundamental_matrices(fm_list)
+    return fm_list

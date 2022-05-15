@@ -52,3 +52,5 @@ PointsList: TypeAlias = List[
         Tuple[int, int]
     ]
 ]
+
+CombinationsList: TypeAlias = List[List[int]]

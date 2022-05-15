@@ -1,5 +1,9 @@
 from typing import List, Tuple
+import cv2 as cv
 import click
+
+from thints.images import ImageList
+import utils.images as images
 
 
 def range_input(message: str, min: int, max: int, verbose: bool = True) -> Tuple[int, bool]:
@@ -105,3 +109,41 @@ def enforce_multi_range_input(message: str, min: int, max: int, required_inputs:
         n += 1
 
     return inputs
+
+
+def handle_images(base_path: str, preview: bool) -> ImageList:
+    img_paths, ok = images.list(base_path)
+    if not ok:
+        click.echo('No images found')
+
+    images.print_list(img_paths)
+
+    # Prompt the use to sepcify how many images to use
+    required_inputs = enforce_range_input(
+        f'Enter how many images to use (min 2, max {len(img_paths)}): ', 2, len(img_paths))
+
+    # Prompt the user to select n images
+    indices = enforce_multi_range_input(
+        f'Enter number between 1 and {len(img_paths)} to select image to use: ', 1, len(img_paths), required_inputs)
+
+    # Collect selected image paths
+    selected_img_paths: List[str] = []
+    for index in indices:
+        selected_img_paths.append(img_paths[index - 1])
+
+    # Load images with OpenCV
+    imgs, err = images.load_images(selected_img_paths)
+    if err != None:
+        click.echo(f'Failed to load images: {err.message}')
+        return
+
+    # Show preview if --preview is passed
+    if preview:
+        cv.namedWindow('preview', cv.WINDOW_NORMAL)
+        for img in imgs:
+            cv.imshow('preview', img)
+            cv.waitKey(0)
+
+        cv.destroyAllWindows()
+
+    return imgs

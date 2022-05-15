@@ -1,8 +1,15 @@
+from typing import List, Tuple
+import cv2 as cv
 import click
-
-from typing import Tuple
 import glob
 import os
+
+from thints.images import ImageList
+
+
+class ImageError:
+    def __init__(self, message: str) -> None:
+        self.message = message
 
 
 def list(base_path: str) -> Tuple[list, bool]:
@@ -53,3 +60,32 @@ def print_list(img_paths: list):
         click.echo(f"  [{i+1}] {img_path}")
 
     click.echo(sep)
+
+
+def load_images(paths: List[str]) -> Tuple[ImageList, ImageError]:
+    '''
+    Load n images from 'paths' via OpenCV at the same time in grayscale.
+
+    Parameters
+    ----------
+    paths : List[str]
+        List of image paths
+
+    Returns
+    -------
+    result : Tuple[ImageList, FeaturesError]
+        List of images (matrices) or an error
+    '''
+    images = []
+
+    for path in paths:
+        if not os.path.exists(path):
+            return images, ImageError(f'Image at {path} does not exist')
+
+        try:
+            img = cv.imread(path, cv.IMREAD_GRAYSCALE)
+            images.append(img)
+        except:
+            return images, ImageError(f'Failed to read image at {path}')
+
+    return images, None
