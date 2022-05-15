@@ -62,6 +62,8 @@ python main.py features lines -p .data
 python main.py features lines -p .data --preview
 ```
 
+---
+
 This subcommand extracts matching points from multiple images and displays the result in a window:
 
 ```shell
@@ -72,9 +74,30 @@ python main.py features points -p .data
 python main.py features points -p .data --preview
 ```
 
+### Depth maps
+
+This subcommand calculates a single depth map from two images and displays the result in a window:
+
+```shell
+python main.py dmap single
+```
+
+*This command has a lot of options (with default values). See `--help` for more information*
+
+---
+
+This subcommand calculates multiple depth maps from two images and combines them. The result is displayed in a window:
+
+```shell
+python main.py dmap multi
+```
+
+*This command has a lot of options (with default values). See `--help` for more information*
+
 ## References
 
 - [https://docs.opencv2.org/4.5.5/da/de9/tutorial_py_epipolar_geometry.html](https://docs.opencv2.org/4.5.5/da/de9/tutorial_py_epipolar_geometry.html)
 - [https://www.andreasjakl.com/understand-and-apply-stereo-rectification-for-depth-maps-part-2/](https://www.andreasjakl.com/understand-and-apply-stereo-rectification-for-depth-maps-part-2/)
 - [https://stackoverflow.com/questions/36172913/opencv-depth-map-from-uncalibrated-stereo-system](https://stackoverflow.com/questions/36172913/opencv-depth-map-from-uncalibrated-stereo-system)
+- [https://www.geeksforgeeks.org/python-opencv-epipolar-geometry/](https://www.geeksforgeeks.org/python-opencv-epipolar-geometry/)
 - [https://github.com/uhahne/BildComp-SoSe2022](https://github.com/uhahne/BildComp-SoSe2022)
