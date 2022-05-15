@@ -7,14 +7,14 @@ import features.features as features
 import utils.input as inp
 
 
-def execute(base_path: str, preview: bool):
+def execute(base_path: str, preview: bool, thresh: int):
     imgs = inp.handle_images(base_path, preview)
 
     click.echo('\nExtracting fundamental matrices. This takes a few seconds...')
     fm_list = features.get_fundamental_matrices(imgs)
 
     click.echo('Rectifying...')
-    rm_list = geometry.rectify(imgs, fm_list)
+    rm_list = geometry.rectify(imgs, fm_list, thresh)
 
     cv.namedWindow('rectify', cv.WINDOW_NORMAL)
 

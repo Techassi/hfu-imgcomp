@@ -7,19 +7,81 @@ import features.features as features
 import utils.input as inp
 
 
-def single(base_path: str, preview: bool):
+def single(
+    base_path: str,
+    preview: bool,
+    speckle_size: int,
+    speckle_range: int,
+    min_disp: int,
+    num_disp: int,
+    disp_diff: int,
+    unique_ratio: int,
+    block_size: int
+):
     imgs = inp.handle_images(base_path, preview)
 
-    click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
+    # Construct stereo params
+    params = geometry.sgbm_params(
+        speckle_size,
+        speckle_range,
+        min_disp,
+        num_disp,
+        disp_diff,
+        unique_ratio,
+        block_size
+    )
 
+    click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
     fm_list = features.get_fundamental_matrices(imgs)
+
+    click.echo('Rectifying...')
     rm_list = geometry.rectify(imgs, fm_list)
 
-    cv.namedWindow('depth-map', cv.WINDOW_NORMAL)
+    click.echo('Computing depth maps...')
+    dm_list = geometry.depth_maps_single(imgs, rm_list, params)
 
-    for rm in rm_list:
-        img_l = cv.warpPerspective(imgs[rm[4][0]], rm[0], rm[2])
-        img_r = cv.warpPerspective(imgs[rm[4][1]], rm[1], rm[3])
+    for dm in dm_list:
+        cv.namedWindow('disparity', cv.WINDOW_NORMAL)
+        cv.imshow('disparity', dm[0])
+        cv.waitKey(0)
 
-        cv.imshow('depth-map', np.concatenate((img_l, img_r), axis=1))
+
+def multi(
+    base_path: str,
+    preview: bool,
+    speckle_size: int,
+    speckle_range: int,
+    min_disp: int,
+    num_disp: int,
+    disp_diff: int,
+    unique_ratio: int,
+    block_size: int
+):
+    imgs = inp.handle_images(base_path, preview)
+
+    # Construct stereo params
+    sgbm_params = geometry.sgbm_params(
+        speckle_size,
+        speckle_range,
+        min_disp,
+        num_disp,
+        disp_diff,
+        unique_ratio,
+        block_size
+    )
+
+    bm_params = geometry.bm_params(num_disp, block_size)
+
+    click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
+    fm_list = features.get_fundamental_matrices(imgs)
+
+    click.echo('Rectifying...')
+    rm_list = geometry.rectify(imgs, fm_list)
+
+    click.echo('Computing and combining depth maps...')
+    dm_list = geometry.depth_maps_multi(imgs, rm_list, bm_params, sgbm_params)
+
+    for dm in dm_list:
+        cv.namedWindow('disparity', cv.WINDOW_NORMAL)
+        cv.imshow('disparity', dm[0])
         cv.waitKey(0)
