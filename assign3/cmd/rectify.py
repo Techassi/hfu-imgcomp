@@ -4,12 +4,13 @@ import click
 
 import geometry.rectification as grect
 import features.features as features
+import utils.images as images
 import utils.input as inp
 
 
 def execute(base_path: str, preview: bool, thresh: int):
     imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
-    combis = features.get_combinations(imgs, combi_mode, ref_index)
+    combis = images.get_combinations(imgs, combi_mode, ref_index)
 
     click.echo('\nExtracting fundamental matrices. This takes a few seconds...')
     fm_list = features.get_fundamental_matrices(imgs, combis)

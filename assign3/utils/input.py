@@ -183,8 +183,8 @@ def handle_images(base_path: str, preview: bool) -> Tuple[ImageList, int, int]:
 
 def handle_combination_mode() -> int:
     click.echo('\nPlease select the combination mode')
-    click.echo('-------')
+    click.echo('------------------')
     click.echo('  [1] All combinations\n  [2] All combinations with a reference image')
-    click.echo('-------')
+    click.echo('------------------')
 
     return enforce_range_input('Enter a number between 1 and 2: ', 1, 2)

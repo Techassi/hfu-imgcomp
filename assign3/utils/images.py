@@ -4,7 +4,7 @@ import click
 import glob
 import os
 
-from thints.images import ImageList
+from thints.images import ImageList, CombinationsList
 
 
 class ImageError:
@@ -89,3 +89,64 @@ def load_images(paths: List[str]) -> Tuple[ImageList, ImageError]:
             return images, ImageError(f'Failed to read image at {path}')
 
     return images, None
+
+
+def get_all_combinations(imgs: ImageList) -> CombinationsList:
+    '''
+    Return all possible image combinations.
+
+    Parameters
+    ----------
+    imgs : ImageList
+        List of images
+
+    Returns
+    -------
+    combis : CombinationsList
+        A list of a list of combinations
+    '''
+    combinations: CombinationsList = []
+
+    for i, _ in enumerate(imgs):
+        if i == len(imgs) - 1:
+            break
+
+        for j in range(1, len(imgs) - i):
+            combinations.append([i, i + j])
+
+    return combinations
+
+
+def get_ref_combinations(imgs: ImageList, ref: int) -> CombinationsList:
+    '''
+    Return all possible image combinations with one image as reference.
+
+    Parameters
+    ----------
+    imgs : ImageList
+        List of images
+    ref : int
+        Index of the reference image
+
+    Returns
+    -------
+    combis : CombinationsList
+        A list of a list of combinations
+    '''
+    combinations: CombinationsList = []
+
+    for i, _ in enumerate(imgs):
+        if i == ref:
+            continue
+
+        combinations.append([ref, i])
+
+    return combinations
+
+
+def get_combinations(imgs: ImageList, combi_mode: int, ref_index: int) -> CombinationsList:
+    ''''''
+    if combi_mode == 1:
+        return get_all_combinations(imgs)
+
+    return get_ref_combinations(imgs, ref_index)

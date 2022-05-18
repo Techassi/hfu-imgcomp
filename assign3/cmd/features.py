@@ -1,16 +1,16 @@
-from typing import List
 import numpy as np
 import cv2 as cv
 import click
 
 import features.features as features
 import utils.drawing as drawing
+import utils.images as images
 import utils.input as inp
 
 
 def epilines(base_path: str, preview: bool):
     imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
-    combis = features.get_combinations(imgs, combi_mode, ref_index)
+    combis = images.get_combinations(imgs, combi_mode, ref_index)
 
     # Get epilines, one function call is just all it takes
     click.echo('\nExtracting epilines. This takes a few seconds...\n')
@@ -24,12 +24,12 @@ def epilines(base_path: str, preview: bool):
         ))
 
         img_left = drawing.epilines(
-            imgs[c[1][1]],
-            c[0][0]
-        )
-        img_right = drawing.epilines(
             imgs[c[1][0]],
             c[0][1]
+        )
+        img_right = drawing.epilines(
+            imgs[c[1][1]],
+            c[0][0]
         )
 
         cv.namedWindow('epilines', cv.WINDOW_NORMAL)
@@ -41,7 +41,7 @@ def epilines(base_path: str, preview: bool):
 
 def points(base_path: str, preview: bool):
     imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
-    combis = features.get_combinations(imgs, combi_mode, ref_index)
+    combis = images.get_combinations(imgs, combi_mode, ref_index)
 
     # Get matching points
     click.echo('\nExtracting matching points. This takes a few seconds...\n')

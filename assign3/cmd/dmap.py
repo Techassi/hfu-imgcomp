@@ -5,6 +5,7 @@ import geometry.rectification as grect
 import geometry.dmaps as gdmaps
 
 import features.features as features
+import utils.images as images
 import utils.input as inp
 
 
@@ -21,7 +22,7 @@ def single(
 ):
 
     imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
-    combis = features.get_combinations(imgs, combi_mode, ref_index)
+    combis = images.get_combinations(imgs, combi_mode, ref_index)
 
     # Construct stereo params
     params = gdmaps.sgbm_params(
@@ -61,7 +62,7 @@ def multi(
     block_size: int
 ):
     imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
-    combis = features.get_combinations(imgs, combi_mode, ref_index)
+    combis = images.get_combinations(imgs, combi_mode, ref_index)
 
     # Construct stereo params
     sgbm_params = gdmaps.sgbm_params(
