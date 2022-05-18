@@ -18,7 +18,7 @@ class FeaturesError:
         self.message = message
 
 
-def get_combinations(imgs: ImageList) -> CombinationsList:
+def get_all_combinations(imgs: ImageList) -> CombinationsList:
     '''
     Return all possible image combinations.
 
@@ -38,14 +38,48 @@ def get_combinations(imgs: ImageList) -> CombinationsList:
         if i == len(imgs) - 1:
             break
 
-        combinations.append([])
         for j in range(1, len(imgs) - i):
-            combinations[i].append(i + j)
+            combinations.append([i, i + j])
 
     return combinations
 
 
-def get_keypoints(imgs: ImageList) -> KeypointDescriptorList:
+def get_ref_combinations(imgs: ImageList, ref: int) -> CombinationsList:
+    '''
+    Return all possible image combinations with one image as reference.
+
+    Parameters
+    ----------
+    imgs : ImageList
+        List of images
+    ref : int
+        Index of the reference image
+
+    Returns
+    -------
+    combis : CombinationsList
+        A list of a list of combinations
+    '''
+    combinations: CombinationsList = []
+
+    for i, _ in enumerate(imgs):
+        if i == ref:
+            continue
+
+        combinations.append([ref, i])
+
+    return combinations
+
+
+def get_combinations(imgs: ImageList, combi_mode: int, ref_index: int) -> CombinationsList:
+    ''''''
+    if combi_mode == 1:
+        return get_all_combinations(imgs)
+
+    return get_ref_combinations(imgs, ref_index)
+
+
+def get_keypoints(imgs: ImageList, combis: CombinationsList) -> KeypointDescriptorList:
     '''
     Return a list of keypoints and descriptors for each combination.
 
@@ -59,27 +93,23 @@ def get_keypoints(imgs: ImageList) -> KeypointDescriptorList:
     list : KeypointDescriptorList
         A list of keypoints and descriptors for each combination
     '''
-    # Get possible image combinations
-    combis = get_combinations(imgs)
-
     # Create SIFT object
     sift = cv.SIFT_create(nfeatures=500)
 
     # Iterate over all combinations
     keypoints_descriptor_list: KeypointDescriptorList = []
-    for i, c in enumerate(combis):
-        for j in c:
-            # [ Tuple [ List [ List[kpoints_in_i], List[kpoints_in_j] ], List [des_in_i, des_in_j] ] ]
-            kpoints_in_i, des_in_i = sift.detectAndCompute(imgs[i], None)
-            kpoints_in_j, des_in_j = sift.detectAndCompute(imgs[j], None)
+    for c in combis:
+        # [ Tuple [ List [ List[kpoints_in_i], List[kpoints_in_j] ], List [des_in_i, des_in_j] ] ]
+        kpoints_in_i, des_in_i = sift.detectAndCompute(imgs[c[0]], None)
+        kpoints_in_j, des_in_j = sift.detectAndCompute(imgs[c[1]], None)
 
-            keypoints_descriptor_list.append(
-                (
-                    [list(kpoints_in_i), list(kpoints_in_j)],
-                    [des_in_i, des_in_j],
-                    (i, j)
-                )
+        keypoints_descriptor_list.append(
+            (
+                [list(kpoints_in_i), list(kpoints_in_j)],
+                [des_in_i, des_in_j],
+                (c[0], c[1])
             )
+        )
 
     return keypoints_descriptor_list
 
@@ -220,7 +250,7 @@ def compute_epilines(fm_list: FundamentalMatricesList) -> EpilinesList:
     return epilines_list
 
 
-def get_epilines(imgs: ImageList) -> EpilinesList:
+def get_epilines(imgs: ImageList, ic_list: CombinationsList) -> EpilinesList:
     '''
     Calculate epilines from a set of images.
 
@@ -234,14 +264,14 @@ def get_epilines(imgs: ImageList) -> EpilinesList:
     epilines : EpilinesList
          A list of epilines for each combination of images
     '''
-    kp_list = get_keypoints(imgs)
+    kp_list = get_keypoints(imgs, ic_list)
     mk_list = match_keypoints(kp_list)
     fm_list = filter_matches(kp_list, mk_list)
     fm_list = find_fundamental_matrices(fm_list)
     return compute_epilines(fm_list)
 
 
-def get_points(imgs: ImageList) -> PointsList:
+def get_points(imgs: ImageList, ic_list: CombinationsList) -> PointsList:
     '''
     Find matching points in a set of two images for every combination.
 
@@ -257,7 +287,7 @@ def get_points(imgs: ImageList) -> PointsList:
     '''
     points_list = []
 
-    kp_list = get_keypoints(imgs)
+    kp_list = get_keypoints(imgs, ic_list)
     mk_list = match_keypoints(kp_list)
     fm_list = filter_matches(kp_list, mk_list)
 
@@ -275,7 +305,7 @@ def get_points(imgs: ImageList) -> PointsList:
     return points_list
 
 
-def get_fundamental_matrices(imgs: ImageList) -> FundamentalMatricesList:
+def get_fundamental_matrices(imgs: ImageList, ic_list: CombinationsList) -> FundamentalMatricesList:
     '''
     Get the fundamental matrix for each of the combinations.
 
@@ -289,7 +319,7 @@ def get_fundamental_matrices(imgs: ImageList) -> FundamentalMatricesList:
     fm_list : FundamentalMatricesList
         A list of fundamental matrices
     '''
-    kp_list = get_keypoints(imgs)
+    kp_list = get_keypoints(imgs, ic_list)
     mk_list = match_keypoints(kp_list)
     fm_list = filter_matches(kp_list, mk_list)
     fm_list = find_fundamental_matrices(fm_list)
