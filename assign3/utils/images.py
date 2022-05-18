@@ -53,7 +53,7 @@ def print_list(img_paths: list):
         List of image paths
     '''
     sep = '------------------' + ('-' * (len(img_paths) // 10))
-    click.echo(f'Found <{len(img_paths)}> image(s)\n{sep}')
+    click.echo(f'\nFound <{len(img_paths)}> image(s)\n{sep}')
 
     for i in range(len(img_paths)):
         img_path = img_paths[i]

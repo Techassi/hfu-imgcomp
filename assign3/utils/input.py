@@ -111,20 +111,51 @@ def enforce_multi_range_input(message: str, min: int, max: int, required_inputs:
     return inputs
 
 
-def handle_images(base_path: str, preview: bool) -> ImageList:
+def enforce_input_from_values(message: str, values: List[int]) -> int:
+    ''''''
+    index = -1
+    while True:
+        input_value = input(message)
+
+        try:
+            index = int(input_value)
+        except:
+            click.echo('Invalid input. Please retry')
+            continue
+
+        if index not in values:
+            click.echo('Selected value not in List of allowed values. Please retry')
+            continue
+
+        break
+
+    return index
+
+
+def handle_images(base_path: str, preview: bool) -> Tuple[ImageList, int, int]:
+    ''''''
     img_paths, ok = images.list(base_path)
     if not ok:
         click.echo('No images found')
 
-    images.print_list(img_paths)
-
-    # Prompt the use to sepcify how many images to use
+    # Prompt the user to sepcify how many images to use
     required_inputs = enforce_range_input(
         f'Enter how many images to use (min 2, max {len(img_paths)}): ', 2, len(img_paths))
+
+    # Prompt the user to specify which combinations to create
+    combi_mode = handle_combination_mode()
+
+    images.print_list(img_paths)
 
     # Prompt the user to select n images
     indices = enforce_multi_range_input(
         f'Enter number between 1 and {len(img_paths)} to select image to use: ', 1, len(img_paths), required_inputs)
+
+    # If the user selected the ref combination mode, aks for the index of the reference image
+    ref_index = -1
+    if combi_mode == 2:
+        allowed_indices = [i for i in range(1, len(indices) + 1)]
+        ref_index = enforce_input_from_values('Please enter the index of the reference image: ', allowed_indices)
 
     # Collect selected image paths
     selected_img_paths: List[str] = []
@@ -135,7 +166,7 @@ def handle_images(base_path: str, preview: bool) -> ImageList:
     imgs, err = images.load_images(selected_img_paths)
     if err != None:
         click.echo(f'Failed to load images: {err.message}')
-        return
+        return None, combi_mode, ref_index
 
     # Show preview if --preview is passed
     if preview:
@@ -146,4 +177,14 @@ def handle_images(base_path: str, preview: bool) -> ImageList:
 
         cv.destroyAllWindows()
 
-    return imgs
+    # Return ref_index - 1 as this value is not zero-indexed
+    return imgs, combi_mode, ref_index - 1
+
+
+def handle_combination_mode() -> int:
+    click.echo('\nPlease select the combination mode')
+    click.echo('-------')
+    click.echo('  [1] All combinations\n  [2] All combinations with a reference image')
+    click.echo('-------')
+
+    return enforce_range_input('Enter a number between 1 and 2: ', 1, 2)
