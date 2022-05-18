@@ -9,11 +9,12 @@ import utils.input as inp
 
 
 def epilines(base_path: str, preview: bool):
-    imgs = inp.handle_images(base_path, preview)
+    imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
+    combis = features.get_combinations(imgs, combi_mode, ref_index)
 
     # Get epilines, one function call is just all it takes
     click.echo('\nExtracting epilines. This takes a few seconds...\n')
-    epilines_list = features.get_epilines(imgs)
+    epilines_list = features.get_epilines(imgs, combis)
 
     for c in epilines_list:
         click.echo('Showing combination of image {} with image {} with a total of {} lines'.format(
@@ -39,11 +40,12 @@ def epilines(base_path: str, preview: bool):
 
 
 def points(base_path: str, preview: bool):
-    imgs = inp.handle_images(base_path, preview)
+    imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
+    combis = features.get_combinations(imgs, combi_mode, ref_index)
 
     # Get matching points
     click.echo('\nExtracting matching points. This takes a few seconds...\n')
-    points_list = features.get_points(imgs)
+    points_list = features.get_points(imgs, combis)
 
     for p in points_list:
         click.echo('Showing combination of image {} with image {} with a total of {} points'.format(

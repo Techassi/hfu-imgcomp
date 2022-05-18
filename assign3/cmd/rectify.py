@@ -8,10 +8,11 @@ import utils.input as inp
 
 
 def execute(base_path: str, preview: bool, thresh: int):
-    imgs = inp.handle_images(base_path, preview)
+    imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
+    combis = features.get_combinations(imgs, combi_mode, ref_index)
 
     click.echo('\nExtracting fundamental matrices. This takes a few seconds...')
-    fm_list = features.get_fundamental_matrices(imgs)
+    fm_list = features.get_fundamental_matrices(imgs, combis)
 
     click.echo('Rectifying...')
     rm_list = grect.rectify(imgs, fm_list, thresh)

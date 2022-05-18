@@ -19,7 +19,9 @@ def single(
     unique_ratio: int,
     block_size: int
 ):
-    imgs = inp.handle_images(base_path, preview)
+
+    imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
+    combis = features.get_combinations(imgs, combi_mode, ref_index)
 
     # Construct stereo params
     params = gdmaps.sgbm_params(
@@ -33,7 +35,7 @@ def single(
     )
 
     click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
-    fm_list = features.get_fundamental_matrices(imgs)
+    fm_list = features.get_fundamental_matrices(imgs, combis)
 
     click.echo('Rectifying...')
     rm_list = grect.rectify(imgs, fm_list)
@@ -58,7 +60,8 @@ def multi(
     unique_ratio: int,
     block_size: int
 ):
-    imgs = inp.handle_images(base_path, preview)
+    imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
+    combis = features.get_combinations(imgs, combi_mode, ref_index)
 
     # Construct stereo params
     sgbm_params = gdmaps.sgbm_params(
@@ -74,7 +77,7 @@ def multi(
     bm_params = gdmaps.bm_params(num_disp, block_size)
 
     click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
-    fm_list = features.get_fundamental_matrices(imgs)
+    fm_list = features.get_fundamental_matrices(imgs, combis)
 
     click.echo('Rectifying...')
     rm_list = grect.rectify(imgs, fm_list)
