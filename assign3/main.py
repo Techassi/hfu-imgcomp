@@ -3,6 +3,7 @@ import click
 import cmd.features as features
 import cmd.rectify as rectify
 import cmd.matrix as matrix
+import cmd.sweep as sweep
 import cmd.dmap as dmap
 
 
@@ -142,8 +143,13 @@ def combine_map_cmd(
 
 
 @cli.command('sweep')
-def sweep_cmd():
-    pass
+@click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
+@click.option('--preview', default=False, help='Show preview windows', type=bool, is_flag=True)
+def sweep_cmd(path: str, preview: bool):
+    '''
+    Compute depth maps via plane sweeping.
+    '''
+    sweep.execute(path, preview)
 
 
 if __name__ == '__main__':
