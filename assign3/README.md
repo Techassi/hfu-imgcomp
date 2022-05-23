@@ -76,20 +76,20 @@ python main.py features points -p .data --preview
 
 ### Depth maps
 
-This subcommand calculates a single depth map from two images and displays the result in a window:
+This subcommand calculates depth maps from all image combinations and displays the result in a window:
 
 ```shell
-python main.py dmap single
+python main.py dmap normal
 ```
 
 *This command has a lot of options (with default values). See `--help` for more information*
 
 ---
 
-This subcommand calculates multiple depth maps from two images and combines them. The result is displayed in a window:
+This subcommand calculates depth maps all image combinations and combines them. The result is displayed in a window:
 
 ```shell
-python main.py dmap multi
+python main.py dmap combine
 ```
 
 *This command has a lot of options (with default values). See `--help` for more information*
