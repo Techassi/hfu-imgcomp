@@ -15,11 +15,6 @@ RectificationMatricesList: TypeAlias = List[
 DepthMapsList: TypeAlias = List[Tuple[np.ndarray, Tuple[int, int]]]
 
 
-class BMParams(TypedDict):
-    numDisparities: int
-    blockSize: int
-
-
 class SGBMParams(TypedDict):
     speckleWindowSize: int
     uniquenessRatio: int

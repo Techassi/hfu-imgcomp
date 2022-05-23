@@ -67,7 +67,7 @@ def points_cmd(path: str, preview: bool):
     features.points(path, preview)
 
 
-@map_group.command('single')
+@map_group.command('normal')
 @click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
 @click.option('--preview', default=False, help='Show preview windows', type=bool, is_flag=True)
 @click.option('--speckle-size', default=10, help='Speckle window size', type=int, show_default=True)
@@ -77,7 +77,7 @@ def points_cmd(path: str, preview: bool):
 @click.option('--disp-diff', default=1, help='Disparity 1-2 max diff', type=int, show_default=True)
 @click.option('--unique-ratio', default=10, help='Uniqueness ratio', type=int, show_default=True)
 @click.option('--block-size', default=8, help='Block size', type=int, show_default=True)
-def single_map_cmd(
+def combine_map_cmd(
     path: str,
     preview: bool,
     speckle_size: int,
@@ -89,9 +89,9 @@ def single_map_cmd(
     block_size: int
 ):
     '''
-    Compute a single depth map from two images.
+    Compute depth maps from two images or more images.
     '''
-    dmap.single(
+    dmap.normal(
         path,
         preview,
         speckle_size,
@@ -104,7 +104,7 @@ def single_map_cmd(
     )
 
 
-@map_group.command('multi')
+@map_group.command('combine')
 @click.option('-p', '--path', default='.data', help='Path to source images', type=str, show_default=True)
 @click.option('--preview', default=False, help='Show preview windows', type=bool, is_flag=True)
 @click.option('--speckle-size', default=10, help='Speckle window size', type=int, show_default=True)
@@ -113,9 +113,8 @@ def single_map_cmd(
 @click.option('--num-disp', default=64, help='Number of disparities', type=int, show_default=True)
 @click.option('--disp-diff', default=1, help='Disparity 1-2 max diff', type=int, show_default=True)
 @click.option('--unique-ratio', default=10, help='Uniqueness ratio', type=int, show_default=True)
-# This needs to be the same as SADWindowSize (which defaults to 21), see https://answers.opencv.org/question/185947/how-to-resolve-a-sadwindowsize-error/
-@click.option('--block-size', default=21, help='Block size', type=int, show_default=True)
-def multi_map_cmd(
+@click.option('--block-size', default=8, help='Block size', type=int, show_default=True)
+def combine_map_cmd(
     path: str,
     preview: bool,
     speckle_size: int,
@@ -127,9 +126,9 @@ def multi_map_cmd(
     block_size: int
 ):
     '''
-    Combine several depth maps from two images.
+    Compute depth maps from two images or more images and combine them into a single depth map.
     '''
-    dmap.multi(
+    dmap.combine(
         path,
         preview,
         speckle_size,

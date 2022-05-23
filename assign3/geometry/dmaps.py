@@ -1,19 +1,13 @@
 import numpy as np
 import cv2 as cv
 
-from thints.geometry import BMParams, DepthMapsList, RectificationMatricesList, SGBMParams
+from thints.geometry import DepthMapsList, RectificationMatricesList, SGBMParams
 from thints.images import ImageList
 
 
-def depth_maps_multi(
-    imgs: ImageList,
-    rm_list: RectificationMatricesList,
-    bm_params: BMParams,
-    sgbm_params: SGBMParams
-) -> DepthMapsList:
+def depth_maps(imgs: ImageList, rm_list: RectificationMatricesList, sgbm_params: SGBMParams) -> DepthMapsList:
     '''
-    Compute multiple depth maps and combine them into one based on two images. This returns depth maps for each
-    combination of images.
+    Compute depth maps for each image combination via semi global matching.
 
     Parameters
     ----------
@@ -21,24 +15,21 @@ def depth_maps_multi(
         List of images (matrices)
     rm_list : RectificationMatricesList
         List of rectification matrices
-    bm_params : BMParams
-
     sgbm_params : SGBMParams
+        Semi global matching params
+
+    Returns
+    -------
+    maps_list : DepthMapsList
+        List of depth maps for each combination
     '''
     maps_list: DepthMapsList = []
 
     stereo_sgbm = cv.StereoSGBM_create(**sgbm_params)
-    stereo_bm = cv.StereoBM_create(**bm_params)
 
     for rm in rm_list:
         disp_sgbm = stereo_sgbm.compute(imgs[rm[4][0]], imgs[rm[4][1]]).astype(np.float32)
-        disp_bm = stereo_bm.compute(imgs[rm[4][0]], imgs[rm[4][1]]).astype(np.float32)
-
         disp_sgbm = cv.normalize(disp_sgbm, 0, 255, cv.NORM_MINMAX)
-        disp_bm = cv.normalize(disp_bm, 0, 255, cv.NORM_MINMAX)
-
-        disp = np.add(disp_sgbm, disp_bm)
-        disp = cv.normalize(disp, 0, 255, cv.NORM_MINMAX)
 
         maps_list.append((
             disp_sgbm,
@@ -48,22 +39,16 @@ def depth_maps_multi(
     return maps_list
 
 
-def depth_maps_single(imgs: ImageList, rm_list: RectificationMatricesList, sgbm_params: SGBMParams) -> DepthMapsList:
+def combine_maps(dm_list: DepthMapsList) -> np.ndarray:
     ''''''
-    maps_list: DepthMapsList = []
+    if len(dm_list) == 1:
+        return dm_list[0][0]
 
-    stereo_sgbm = cv.StereoSGBM_create(**sgbm_params)
+    disp = dm_list[0][0]
+    for i in range(1, len(dm_list)):
+        disp = np.add(disp, dm_list[i][0])
 
-    for rm in rm_list:
-        disp_sgbm = stereo_sgbm.compute(imgs[rm[4][0]], imgs[rm[4][1]]).astype(np.float32)
-        disp_sgbm = cv.normalize(disp_sgbm, 0, 255, cv.NORM_MINMAX)
-
-        maps_list.append((
-            disp_sgbm,
-            rm[4]
-        ))
-
-    return maps_list
+    return cv.normalize(disp, 0, 255, cv.NORM_MINMAX)
 
 
 def sgbm_params(
@@ -86,16 +71,5 @@ def sgbm_params(
         'minDisparity': min_disp,
         'speckleRange': speckle_range,
         'blockSize': block_size
-    }
-    return p
-
-
-def bm_params(num_disp: int, block_size: int) -> BMParams:
-    '''
-    Construct a new BMParams typed dict.
-    '''
-    p: BMParams = {
-        'numDisparities': num_disp,
-        'blockSize': block_size,
     }
     return p

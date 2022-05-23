@@ -9,7 +9,7 @@ import utils.images as images
 import utils.input as inp
 
 
-def single(
+def normal(
     base_path: str,
     preview: bool,
     speckle_size: int,
@@ -20,7 +20,6 @@ def single(
     unique_ratio: int,
     block_size: int
 ):
-
     imgs, combi_mode, ref_index = inp.handle_images(base_path, preview)
     combis = images.get_combinations(imgs, combi_mode, ref_index)
 
@@ -35,22 +34,27 @@ def single(
         block_size
     )
 
-    click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
+    click.echo('\nExtracting fundamental matrices. This takes a few seconds...')
     fm_list = features.get_fundamental_matrices(imgs, combis)
 
     click.echo('Rectifying...')
     rm_list = grect.rectify(imgs, fm_list)
 
-    click.echo('Computing depth maps...')
-    dm_list = gdmaps.depth_maps_single(imgs, rm_list, params)
+    click.echo('Computing depth maps...\n')
+    dm_list = gdmaps.depth_maps(imgs, rm_list, params)
 
     for dm in dm_list:
+        click.echo('Showing combination of image {} with image {}'.format(
+            dm[1][0] + 1,
+            dm[1][1] + 1,
+        ))
+
         cv.namedWindow('disparity', cv.WINDOW_NORMAL)
         cv.imshow('disparity', dm[0])
         cv.waitKey(0)
 
 
-def multi(
+def combine(
     base_path: str,
     preview: bool,
     speckle_size: int,
@@ -65,7 +69,7 @@ def multi(
     combis = images.get_combinations(imgs, combi_mode, ref_index)
 
     # Construct stereo params
-    sgbm_params = gdmaps.sgbm_params(
+    params = gdmaps.sgbm_params(
         speckle_size,
         speckle_range,
         min_disp,
@@ -75,18 +79,18 @@ def multi(
         block_size
     )
 
-    bm_params = gdmaps.bm_params(num_disp, block_size)
-
-    click.echo('\nExtracting fundamental matrices. This takes a few seconds...\n')
+    click.echo('\nExtracting fundamental matrices. This takes a few seconds...')
     fm_list = features.get_fundamental_matrices(imgs, combis)
 
     click.echo('Rectifying...')
     rm_list = grect.rectify(imgs, fm_list)
 
-    click.echo('Computing and combining depth maps...')
-    dm_list = gdmaps.depth_maps_multi(imgs, rm_list, bm_params, sgbm_params)
+    click.echo('Computing depth maps...')
+    dm_list = gdmaps.depth_maps(imgs, rm_list, params)
 
-    for dm in dm_list:
-        cv.namedWindow('disparity', cv.WINDOW_NORMAL)
-        cv.imshow('disparity', dm[0])
-        cv.waitKey(0)
+    click.echo('Combining depth maps...')
+    dm = gdmaps.combine_maps(dm_list)
+
+    cv.namedWindow('disparity', cv.WINDOW_NORMAL)
+    cv.imshow('disparity', dm)
+    cv.waitKey(0)
