@@ -52,3 +52,13 @@ PointsList: TypeAlias = List[
         Tuple[int, int]
     ]
 ]
+
+EssentialMatricesList: TypeAlias = List[
+    Tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        Tuple[int, int]
+    ]
+]

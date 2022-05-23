@@ -126,6 +126,6 @@ def get_intrinsic_matrix(path: str) -> Tuple[np.ndarray, ExifError]:
     m[1, 1] = fy
     m[0, 2] = cx
     m[1, 2] = cy
-    m[2, 2] = 0.0
+    m[2, 2] = 1  # Does this need to be 1 or 0?
 
     return m, None

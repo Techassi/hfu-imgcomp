@@ -5,6 +5,7 @@ from thints.images import ImageList, CombinationsList
 from thints.features import (
     FundamentalMatricesList,
     KeypointDescriptorList,
+    EssentialMatricesList,
     FilteredMatchesList,
     FlannMatchesList,
     EpilinesList,
@@ -38,8 +39,8 @@ def get_keypoints(imgs: ImageList, combis: CombinationsList) -> KeypointDescript
     keypoints_descriptor_list: KeypointDescriptorList = []
     for c in combis:
         # [ Tuple [ List [ List[kpoints_in_i], List[kpoints_in_j] ], List [des_in_i, des_in_j] ] ]
-        kpoints_in_i, des_in_i = sift.detectAndCompute(imgs[c[0]], None)
-        kpoints_in_j, des_in_j = sift.detectAndCompute(imgs[c[1]], None)
+        kpoints_in_i, des_in_i = sift.detectAndCompute(imgs[c[0]][0], None)
+        kpoints_in_j, des_in_j = sift.detectAndCompute(imgs[c[1]][0], None)
 
         keypoints_descriptor_list.append(
             (
@@ -154,6 +155,40 @@ def find_fundamental_matrices(fm_list: FilteredMatchesList) -> FundamentalMatric
         m_list.append((f, mask, points_in_left, points_in_right, m[3]))
 
     return m_list
+
+
+def find_essential_matrices(fm_list: FundamentalMatricesList, intrinsic_matrix: np.ndarray) -> EssentialMatricesList:
+    '''
+    Find and decompose essential matrix. The matrix gets decomposed into two possible rotation matrices and one
+    possible translation matrix.
+
+    Parameters
+    ----------
+    fm_list : FundamentalMatricesList
+        List of fundamental matrices
+    intrinsic_matrix : np.ndarray
+        Intrinsic camera matrix
+
+    Returns
+    -------
+    em_list : EssentialMatricesList
+        List of essential matrices and decomposed matrix values
+    '''
+    em_list: EssentialMatricesList = []
+
+    for m in fm_list:
+        em, _ = cv.findEssentialMat(m[2], m[3], intrinsic_matrix)
+        r1, r2, t = cv.decomposeEssentialMat(em)
+
+        em_list.append((
+            em,
+            r1,
+            r2,
+            t,
+            m[4]
+        ))
+
+    return em_list
 
 
 def compute_epilines(fm_list: FundamentalMatricesList) -> EpilinesList:

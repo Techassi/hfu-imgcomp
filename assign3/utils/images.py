@@ -76,7 +76,7 @@ def load_images(paths: List[str]) -> Tuple[ImageList, ImageError]:
     result : Tuple[ImageList, FeaturesError]
         List of images (matrices) or an error
     '''
-    images = []
+    images: ImageList = []
 
     for path in paths:
         if not os.path.exists(path):
@@ -84,7 +84,7 @@ def load_images(paths: List[str]) -> Tuple[ImageList, ImageError]:
 
         try:
             img = cv.imread(path, cv.IMREAD_GRAYSCALE)
-            images.append(img)
+            images.append((img, path))
         except:
             return images, ImageError(f'Failed to read image at {path}')
 

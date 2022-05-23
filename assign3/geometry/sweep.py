@@ -1,3 +1,7 @@
+import numpy as np
+
+from thints.features import EssentialMatricesList, FundamentalMatricesList
+
 # Plane sweep algo:
 # - Sweep planes parallel to the ref camera
 # - Reproject neighbors onto each plane (homography)
@@ -34,3 +38,7 @@ def plane_sweep():
 
 # d = np.arange(min_depth, max_depth, s)
 # print(len(d))
+
+
+def triangulate_points(em_list: EssentialMatricesList, fm_list: FundamentalMatricesList, intrinsic_matrix: np.ndarray):
+    ''''''
