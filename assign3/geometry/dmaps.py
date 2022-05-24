@@ -28,7 +28,7 @@ def depth_maps(imgs: ImageList, rm_list: RectificationMatricesList, sgbm_params:
     stereo_sgbm = cv.StereoSGBM_create(**sgbm_params)
 
     for rm in rm_list:
-        disp_sgbm = stereo_sgbm.compute(imgs[rm[4][0]], imgs[rm[4][1]]).astype(np.float32)
+        disp_sgbm = stereo_sgbm.compute(imgs[rm[4][0]][0], imgs[rm[4][1]][0]).astype(np.float32)
         disp_sgbm = cv.normalize(disp_sgbm, 0, 255, cv.NORM_MINMAX)
 
         maps_list.append((

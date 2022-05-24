@@ -21,8 +21,8 @@ def execute(base_path: str, preview: bool, thresh: int):
     cv.namedWindow('rectify', cv.WINDOW_NORMAL)
 
     for rm in rm_list:
-        img_l = cv.warpPerspective(imgs[rm[4][0]], rm[0], rm[2])
-        img_r = cv.warpPerspective(imgs[rm[4][1]], rm[1], rm[3])
+        img_l = cv.warpPerspective(imgs[rm[4][0]][0], rm[0], rm[2])
+        img_r = cv.warpPerspective(imgs[rm[4][1]][0], rm[1], rm[3])
 
         cv.imshow('rectify', np.concatenate((img_l, img_r), axis=1))
         cv.waitKey(0)
