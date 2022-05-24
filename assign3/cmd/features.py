@@ -24,11 +24,11 @@ def epilines(base_path: str, preview: bool):
         ))
 
         img_left = drawing.epilines(
-            imgs[c[1][0]],
+            imgs[c[1][0]][0],
             c[0][1]
         )
         img_right = drawing.epilines(
-            imgs[c[1][1]],
+            imgs[c[1][1]][0],
             c[0][0]
         )
 
@@ -54,7 +54,7 @@ def points(base_path: str, preview: bool):
             len(p[0])
         ))
 
-        frame = drawing.matching_keypoints(imgs[p[4][0]], p[0], imgs[p[4][1]], p[1], p[2], p[3])
+        frame = drawing.matching_keypoints(imgs[p[4][0]][0], p[0], imgs[p[4][1]][0], p[1], p[2], p[3])
         cv.namedWindow('matches', cv.WINDOW_NORMAL)
         cv.imshow('matches', frame)
         cv.waitKey(0)
