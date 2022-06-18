@@ -98,6 +98,7 @@ def open(
     images: List[o3d.geometry.RGBDImage] = []
     processed_images = 0
 
+    # Read while the reader is not EOF
     with click.progressbar(length=int(duration), label='Reading...') as bar:
         while not reader.is_eof():
             if with_progress and processed_images % 30 == 0 and processed_images != 0:

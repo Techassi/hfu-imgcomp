@@ -56,3 +56,8 @@ python main.py export --path path/to/mkv/video/file
 - [http://www.open3d.org/docs/release/tutorial/reconstruction_system/system_overview.html](http://www.open3d.org/docs/release/tutorial/reconstruction_system/system_overview.html)
 - [http://www.open3d.org/docs/release/python_api/open3d.io.AzureKinectMKVReader.html](http://www.open3d.org/docs/release/python_api/open3d.io.AzureKinectMKVReader.html)
 - [http://www.open3d.org/docs/release/python_api/open3d.geometry.RGBDImage.html](http://www.open3d.org/docs/release/python_api/open3d.geometry.RGBDImage.html)
+
+**Disclaimer** Most of the code is copied directly from the Open3D examples, see:
+
+- [https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/opencv_pose_estimation.py](https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/opencv_pose_estimation.py)
+- [https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/make_fragments.py](https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/make_fragments.py)
