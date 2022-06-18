@@ -42,6 +42,9 @@ mesh (PLY file). In detail the command works like this:
    use for reconstruction. This file then gets read by the Open3D AzureKinectMKVReader, which allows us to iterate over
    each individual frame.
 2. Each frame gets fed to the reconstruction system / pipeline. This pipeline consists of multiple steps:
+   1. [Make fragments](http://www.open3d.org/docs/release/tutorial/reconstruction_system/make_fragments.html#reconstruction-system-make-fragments):
+      build local geometric surfaces (referred to as fragments) from short subsequences of the input RGBD sequence. This
+      part uses RGBD Odometry, Multiway registration, and RGBD integration.
 
 ```shell
 python main.py export
