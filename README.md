@@ -21,3 +21,5 @@ The core dependencies are:
   data structures. ([PyPI](https://pypi.org/project/numpy/))
 - Click: `click`. Click is a Python package for creating beautiful command line interfaces in a composable way with as
   little code as necessary. ([PyPI](https://pypi.org/project/click/))
+- Open3D: `open3d`. Open3D is a Python package written in C++ to easily work with 3D data.
+  ([PyPI](https://pypi.org/project/open3d/))
