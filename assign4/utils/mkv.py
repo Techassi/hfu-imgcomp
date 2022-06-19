@@ -95,6 +95,10 @@ def open(
             duration
         ))
 
+    # Write intrinsics
+    intrinsics_path = os.path.join(os.path.dirname(vid_path), 'intrinsics.json')
+    o3d.io.write_azure_kinect_mkv_metadata(intrinsics_path, meta)
+
     images: List[o3d.geometry.RGBDImage] = []
     processed_images = 0
 
@@ -104,8 +108,10 @@ def open(
             if with_progress and processed_images % 30 == 0 and processed_images != 0:
                 bar.update(1)
 
-            images.append(reader.next_frame())
-            processed_images += 1
+            frame = reader.next_frame()
+            if frame != None:
+                images.append(frame)
+                processed_images += 1
 
     end = time.time() - start
     if with_progress:

@@ -1,6 +1,6 @@
 import click
 
-import cmd.export as export
+import cmd.extract as extract
 
 
 @click.group()
@@ -8,22 +8,14 @@ def cli():
     pass
 
 
-@cli.command('view')
+@cli.command('extract')
 @click.option('-p', '--path', default='.data', help='Path to source MKV video', type=str, show_default=True)
-def view_cmd(path: str):
+@click.option('-c', '--config', default='.data/config.toml', help="Path to TOML config file", type=str, show_default=True)
+def extract_cmd(path: str, config: str):
     '''
-    Reconstruct 3D scene from a video and view it in an interactive 3D viewer
+    Extract color + depth images from a video and save them in seperate .jpg and .png files
     '''
-    pass
-
-
-@cli.command('export')
-@click.option('-p', '--path', default='.data', help='Path to source MKV video', type=str, show_default=True)
-def export_cmd(path: str):
-    '''
-    Reconstruct 3D scene from a video and export it in a PLY file
-    '''
-    export.execute(path)
+    extract.execute(path, config)
 
 
 if __name__ == '__main__':
