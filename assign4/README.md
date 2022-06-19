@@ -33,23 +33,61 @@ To retrieve usage information on each subcommand run
 python main.py <COMMAND> --help
 ```
 
-### Export
+### Extract
 
-This subcommand allows the user to reconstruct a 3D scene from a MKV video file. The scene then gets exported as a 3D
-mesh (PLY file). In detail the command works like this:
-
-1. Glob the `.data` dir for `.mkv` video files and dislay them in the terminal. The user then can choose which file to
-   use for reconstruction. This file then gets read by the Open3D AzureKinectMKVReader, which allows us to iterate over
-   each individual frame.
-2. Each frame gets fed to the reconstruction system / pipeline. This pipeline consists of multiple steps:
-   1. [Make fragments](http://www.open3d.org/docs/release/tutorial/reconstruction_system/make_fragments.html#reconstruction-system-make-fragments):
-      build local geometric surfaces (referred to as fragments) from short subsequences of the input RGBD sequence. This
-      part uses RGBD Odometry, Multiway registration, and RGBD integration.
+This subcommand allows the user to read a MKV video file, which consists of RGBD images (RGB images with depth
+information). First the script reads every frame until we reach the end of the file. After that the script splits every
+frame into an RGB and depth image and saves them in separate JPG and PNG files.
 
 ```shell
 python main.py export
-python main.py export --path path/to/mkv/video/file
+python main.py export --path path/to/data/base/path
 ```
+
+### Reconstruction
+
+After we extracted separate image files, we can use the Open3D reconstruction system. The systems works in four
+different steps:
+
+- The first step makes fragments from a pair of RGBD images. This is done in parallel via a multi-threaded task worker.
+- The second step takes those fragments and aligns them to each other in global space.
+- The third step refines the alignment.
+- The forth and last step combines the fragments into a single volume and exports the mesh as a PLY file.
+
+The config used is:
+
+```json
+{
+    "name": "Open3D reconstruction",
+    "path_dataset": "path/to/assign4/.data",
+    "path_intrinsic": "path/to/assign4/.data/intrinsics.json",
+    "depth_max": 3.0,
+    "voxel_size": 0.05,
+    "depth_diff_max": 0.07,
+    "preference_loop_closure_odometry": 0.1,
+    "preference_loop_closure_registration": 5.0,
+    "tsdf_cubic_size": 3.0,
+    "icp_method": "color",
+    "global_registration": "ransac",
+    "python_multi_threading": true
+}
+```
+
+To run the system each steps needs to be executed in the correct order via the following commands:
+
+```shell
+cd examples/python/reconstruction_system
+
+python run_system.py --config ./config/tutorial.json --make
+python run_system.py --config ./config/tutorial.json --register
+python run_system.py --config ./config/tutorial.json --refine
+python run_system.py --config ./config/tutorial.json --integrate
+```
+
+The resulting mesh can be opened with MeshLab or other 3D mesh viewers.
+
+**Note:** There was a bug in the reconstruction system code on the master branch. The bug fix was applied locally but
+a [PR](5219) was opened to fix it.
 
 ## References
 
@@ -57,7 +95,7 @@ python main.py export --path path/to/mkv/video/file
 - [http://www.open3d.org/docs/release/python_api/open3d.io.AzureKinectMKVReader.html](http://www.open3d.org/docs/release/python_api/open3d.io.AzureKinectMKVReader.html)
 - [http://www.open3d.org/docs/release/python_api/open3d.geometry.RGBDImage.html](http://www.open3d.org/docs/release/python_api/open3d.geometry.RGBDImage.html)
 
-**Disclaimer** Most of the code is copied directly from the Open3D examples, see:
+**Disclaimer**
 
-- [https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/opencv_pose_estimation.py](https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/opencv_pose_estimation.py)
-- [https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/make_fragments.py](https://github.com/isl-org/Open3D/blob/master/examples/python/reconstruction_system/make_fragments.py)
+Only the extraction code is written by us. The reconstruction system used can be found
+[here](https://github.com/isl-org/Open3D/tree/master/examples/python/reconstruction_system).
