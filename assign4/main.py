@@ -9,13 +9,12 @@ def cli():
 
 
 @cli.command('extract')
-@click.option('-p', '--path', default='.data', help='Path to source MKV video', type=str, show_default=True)
-@click.option('-c', '--config', default='.data/config.toml', help="Path to TOML config file", type=str, show_default=True)
-def extract_cmd(path: str, config: str):
+@click.option('-p', '--path', default='.data', help='Base data path', type=str, show_default=True)
+def extract_cmd(path: str):
     '''
-    Extract color + depth images from a video and save them in seperate .jpg and .png files
+    Extract color + depth images from a video and save them in seperate files
     '''
-    extract.execute(path, config)
+    extract.execute(path)
 
 
 if __name__ == '__main__':
